@@ -30,13 +30,7 @@ struct RitualSheet: View {
                     .foregroundStyle(.secondary)
                 Spacer()
 
-                ProgressView(timerInterval: pageShownAt...pageShownAt.addingTimeInterval(app.policy.ritualPageWait), countsDown: false) {
-                    EmptyView()
-                } currentValueLabel: {
-                    EmptyView()
-                }
-                .tint(.secondary)
-                .opacity(unlocked ? 0 : 1)
+                BreathingGuide(start: pageShownAt, wait: app.policy.ritualPageWait, unlocked: unlocked)
 
                 Button {
                     withAnimation { store.send(id, .ritualNext) }
@@ -61,8 +55,52 @@ struct RitualSheet: View {
                 unlocked = false
                 pageShownAt = Date()
                 try? await Task.sleep(for: .seconds(app.policy.ritualPageWait))
-                if !Task.isCancelled { unlocked = true }
+                if !Task.isCancelled {
+                    unlocked = true
+                    Haptics.tick()
+                }
             }
         }
+    }
+}
+
+/// One slow breath per page: the circle swells and shrinks while a ring fills
+/// over the page's wait. The button below unlocks when the ring closes.
+private struct BreathingGuide: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let start: Date
+    let wait: TimeInterval
+    let unlocked: Bool
+
+    var body: some View {
+        TimelineView(.animation(paused: unlocked && reduceMotion)) { context in
+            let t = context.date.timeIntervalSince(start)
+            let progress = min(1, max(0, t / wait))
+            // A full breath takes `wait` seconds: in for the first half, out for the second.
+            let phase = (t.truncatingRemainder(dividingBy: wait)) / wait
+            let breath = reduceMotion ? 0.5 : (1 - cos(phase * 2 * .pi)) / 2
+            ZStack {
+                Circle()
+                    .fill(RadialGradient(colors: [.cyan.opacity(0.55), .indigo.opacity(0.18)], center: .center, startRadius: 4, endRadius: 70))
+                    .frame(width: 120, height: 120)
+                    .scaleEffect(0.65 + 0.35 * breath)
+                    .blur(radius: 2)
+                Circle()
+                    .stroke(.secondary.opacity(0.2), lineWidth: 3)
+                    .frame(width: 140, height: 140)
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(.cyan, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 140, height: 140)
+                Text(unlocked ? "可以继续了" : (phase < 0.5 ? "吸气" : "呼气"))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.primary.opacity(0.8))
+                    .contentTransition(.opacity)
+            }
+        }
+        .frame(height: 150)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(unlocked ? "可以继续了" : "跟着圆圈慢慢呼吸")
     }
 }

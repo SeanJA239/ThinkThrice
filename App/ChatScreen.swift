@@ -4,10 +4,15 @@ import SwiftUI
 
 struct ChatScreen: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.colorScheme) private var systemScheme
     @Bindable var store: ChatStore
     @State private var showDebugPanel = false
 
     var body: some View {
+        let _ = app.clockRevision
+        // Night follows the demo clock: the chat turns into a starry night sky and
+        // switches to dark mode, sheets included.
+        let night = app.policy.isNight(app.now)
         ChatView(messages: store.messages) { draft in
             store.submit(draft.text)
         } messageBuilder: { params in
@@ -21,6 +26,10 @@ struct ChatScreen: View {
         .showDateHeaders(false)
         // Times are shown iMessage style, under the newest delivered message (see CalmMessageCell).
         .showMessageTimeView(false)
+        // A clear list so the day or night sky shows behind the messages.
+        .chatTheme(colors: .init(mainBG: .clear))
+        .background { ChatAtmosphere(night: night).ignoresSafeArea() }
+        .animation(.easeInOut(duration: 1.2), value: night)
         .overlay(alignment: .top) { banner }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -33,16 +42,22 @@ struct ChatScreen: View {
             .sharedBackgroundVisibility(.hidden)
         }
         .sheet(item: $store.route) { route in
-            switch route {
-            case .actions(let id): ActionPanel(store: store, id: id)
-            case .ritual(let id): RitualSheet(store: store, id: id)
-            case .confirm(let id): ConfirmSheet(store: store, id: id)
-            case .melt(let id): MeltEditor(store: store, id: id)
+            Group {
+                switch route {
+                case .actions(let id): ActionPanel(store: store, id: id)
+                case .ritual(let id): RitualSheet(store: store, id: id)
+                case .confirm(let id): ConfirmSheet(store: store, id: id)
+                case .melt(let id): MeltEditor(store: store, id: id)
+                }
             }
+            .nightSheet(night, otherwise: systemScheme)
         }
         .sheet(isPresented: $showDebugPanel) {
             DebugClockPanel()
+                .environment(\.colorScheme, systemScheme)
         }
+        .toolbarColorScheme(night ? .dark : nil, for: .navigationBar)
+        .environment(\.colorScheme, night ? .dark : systemScheme)
     }
 
     @ViewBuilder private var banner: some View {
@@ -126,6 +141,19 @@ struct ChatHeader: View {
         case .online: .green
         case .searching: .orange
         case .disconnected: .gray
+        }
+    }
+}
+
+extension View {
+    /// Sheets don't take the chat's dark mode on their own: at night give them a
+    /// night-sky background and dark text explicitly.
+    @ViewBuilder func nightSheet(_ night: Bool, otherwise scheme: ColorScheme) -> some View {
+        if night {
+            environment(\.colorScheme, .dark)
+                .presentationBackground(Color(red: 0.07, green: 0.09, blue: 0.22))
+        } else {
+            environment(\.colorScheme, scheme)
         }
     }
 }

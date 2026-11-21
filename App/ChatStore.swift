@@ -103,6 +103,18 @@ final class ChatStore: Identifiable {
         return (isFirst, isLast)
     }
 
+    /// Messages still held on this phone, shown as a badge in the conversation list.
+    var heldCount: Int {
+        records.values.filter { $0.state.isHeld && $0.state != .dissolving }.count
+    }
+
+    /// When the newest row happened: delivery time for my delivered messages.
+    var lastActivity: Date? {
+        guard let last = messages.last else { return nil }
+        guard let record = records[last.id] else { return last.createdAt }
+        return record.deliveredAt ?? record.createdAt
+    }
+
     var lastMessagePreview: String {
         guard let last = messages.last else { return "" }
         if let record = records[last.id], record.state.isHeld { return "沉淀中…" }
@@ -179,6 +191,7 @@ final class ChatStore: Identifiable {
         switch new.state {
         case .delivered:
             app.notifications.cancel(id: new.id)
+            if old.state == .scoring { Haptics.sent() } else { Haptics.delivered() }
             let wire = WireMessage(id: new.id, text: new.text, sentAt: new.deliveredAt ?? app.now)
             Task { [weak self] in
                 guard let self else { return }
@@ -190,8 +203,12 @@ final class ChatStore: Identifiable {
                 self.peerIsTyping = self.repliesInFlight > 0
             }
         case .settling where old.state == .scoring:
+            Haptics.freeze()
             app.notifications.schedule(for: new, peerName: peer.name, clock: app.clock, policy: app.policy)
+        case .settling where old.state == .rescoring, .ready where old.state == .rescoring:
+            Haptics.freeze()
         case .dissolving:
+            Haptics.dissolve()
             app.notifications.cancel(id: new.id)
             Task { [weak self] in
                 try? await Task.sleep(for: DissolveBubble.duration)

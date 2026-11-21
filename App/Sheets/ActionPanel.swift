@@ -15,6 +15,11 @@ struct ActionPanel: View {
             Text("对方还看不到它。你想怎么处理？")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            if let reason {
+                Label(reason, systemImage: "snowflake")
+                    .font(.footnote)
+                    .foregroundStyle(.cyan)
+            }
 
             exit(night ? "当晚就要发" : "现在就要发", detail: "先看完 \(app.policy.ritualQuestionCount(at: app.now)) 个问题", icon: "flame") {
                 store.send(id, .startRitual)
@@ -34,6 +39,17 @@ struct ActionPanel: View {
         }
         .padding(24)
         .presentationDetents([.medium])
+    }
+
+    /// Why this message was held: its score, and the keyword rules it matched.
+    private var reason: String? {
+        guard let record = store.records[id], let score = record.lastScore else { return nil }
+        let value = score.formatted(.number.precision(.fractionLength(2)))
+        let matched = app.keywords.matches(in: record.text).prefix(3).map { rule in
+            rule.regex == true ? (rule.category ?? "句式") : "「\(rule.pattern)」"
+        }
+        if matched.isEmpty { return "冲动指数 \(value) · 模型判断" }
+        return "冲动指数 \(value) · 因为 \(matched.joined(separator: " "))"
     }
 
     private func exit(_ title: String, detail: String, icon: String, action: @escaping () -> Void) -> some View {

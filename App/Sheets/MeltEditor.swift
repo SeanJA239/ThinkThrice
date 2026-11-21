@@ -20,7 +20,7 @@ struct MeltEditor: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text("原文正在一句句浮现，你只能改已经出现的部分。")
+                Text("原文冻住了，正在一句句化开；你只能改已经化开的部分。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -30,16 +30,32 @@ struct MeltEditor: View {
                     .padding(10)
                     .glassEffect(.regular, in: .rect(cornerRadius: 16))
 
-                let hidden = pieces.dropFirst(revealed).joined()
-                if !hidden.isEmpty {
-                    Text(hidden)
-                        .foregroundStyle(.secondary)
-                        .blur(radius: 6)
-                        .padding(14)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .glassEffect(.regular.tint(.gray.opacity(0.2)), in: .rect(cornerRadius: 16))
-                        .allowsHitTesting(false)
-                        .accessibilityLabel("还有 \(pieces.count - revealed) 句未显出")
+                // Sentences not yet revealed stay frozen, one block each; each melts
+                // away as it thaws into the editor above.
+                let frozen = Array(pieces.enumerated()).dropFirst(revealed)
+                if !frozen.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(frozen, id: \.offset) { _, piece in
+                            HStack(spacing: 8) {
+                                Image(systemName: "snowflake")
+                                    .foregroundStyle(.cyan)
+                                Text(piece)
+                                    .foregroundStyle(.secondary)
+                                    .blur(radius: 5)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .glassEffect(.clear.tint(.cyan.opacity(0.18)), in: .rect(cornerRadius: 14))
+                            .transition(.asymmetric(
+                                insertion: .identity,
+                                removal: AnyTransition(.blurReplace).combined(with: .scale(scale: 1.08)).combined(with: .move(edge: .top))
+                            ))
+                        }
+                    }
+                    .allowsHitTesting(false)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("还有 \(pieces.count - revealed) 句冻着，会一句句化开")
                 }
                 Spacer()
             }
@@ -77,8 +93,11 @@ struct MeltEditor: View {
             try? await Task.sleep(for: .seconds(app.policy.meltRevealInterval))
             guard !Task.isCancelled, !submitted else { return }
             let before = revealed
-            store.send(id, .revealNext)
+            withAnimation(.easeOut(duration: 0.7)) {
+                store.send(id, .revealNext)
+            }
             guard revealed > before else { return }
+            Haptics.tick()
             withAnimation(.easeOut(duration: 0.6)) {
                 edited += pieces[before]
             }

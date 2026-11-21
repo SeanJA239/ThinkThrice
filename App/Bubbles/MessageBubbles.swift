@@ -180,24 +180,34 @@ struct DeliveredBubble: View {
 }
 
 /// A held message: the bubble it would have been, muted and frozen inside a
-/// thick Liquid Glass shell. The text can't be selected or copied.
+/// thick Liquid Glass shell. The text can't be selected or copied. With
+/// `frozen` false it is a plain blue bubble, so animating `frozen` to true plays
+/// the freeze: the colour drains, an icy glint appears and the shell closes around it.
 private struct FrozenShell: View {
     let text: String
     var tint: Color = .cyan
+    var frozen = true
 
     var body: some View {
         Text(text)
             .font(.body)
-            .foregroundStyle(.white.opacity(0.9))
+            .foregroundStyle(.white.opacity(frozen ? 0.9 : 1))
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
             .textSelection(.disabled)
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
-            .background(Color.blue.opacity(0.4), in: .rect(cornerRadius: 18, style: .continuous))
-            .saturation(0.6)
-            .padding(7)
-            .glassEffect(.clear.tint(tint.opacity(0.22)).interactive(), in: .rect(cornerRadius: 25))
+            .background(Color.blue.opacity(frozen ? 0.4 : 1), in: .rect(cornerRadius: 18, style: .continuous))
+            .overlay {
+                // Frost on the inner bubble: a cold glint from the top-left corner.
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(LinearGradient(colors: [.white.opacity(0.45), .white.opacity(0.05), .clear], startPoint: .topLeading, endPoint: .center))
+                    .opacity(frozen ? 1 : 0)
+                    .allowsHitTesting(false)
+            }
+            .saturation(frozen ? 0.6 : 1)
+            .padding(frozen ? 7 : 0)
+            .glassEffect(.clear.tint(tint.opacity(frozen ? 0.22 : 0)).interactive(), in: .rect(cornerRadius: 25))
             .overlay {
                 // A bright rim on top and a faint one below make the shell read as thick glass.
                 RoundedRectangle(cornerRadius: 25)
@@ -205,31 +215,123 @@ private struct FrozenShell: View {
                         LinearGradient(colors: [.white.opacity(0.9), .white.opacity(0.15), tint.opacity(0.35)], startPoint: .top, endPoint: .bottom),
                         lineWidth: 1.2
                     )
+                    .opacity(frozen ? 1 : 0)
             }
-            .shadow(color: tint.opacity(0.28), radius: 14, y: 6)
+            .shadow(color: tint.opacity(frozen ? 0.28 : 0), radius: 14, y: 6)
     }
 }
 
-/// Frozen while it settles; the countdown sits under the shell.
+/// Snowflakes that burst out of a bubble the moment it freezes.
+private struct SnowBurst: View {
+    @State private var spread = false
+    private static let count = 14
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<Self.count, id: \.self) { i in
+                let angle = Double(i) / Double(Self.count) * 2 * .pi + noise(i, 7) * 0.5
+                let distance = 50 + noise(i, 8) * 50
+                Image(systemName: "snowflake")
+                    .font(.system(size: 9 + noise(i, 9) * 9, weight: .semibold))
+                    .foregroundStyle(.cyan.opacity(0.9), .white)
+                    .rotationEffect(.degrees(spread ? 160 * (noise(i, 10) - 0.5) : 0))
+                    .offset(x: spread ? cos(angle) * distance : 0, y: spread ? sin(angle) * distance * 0.6 : 0)
+                    .scaleEffect(spread ? 1 : 0.2)
+                    .opacity(spread ? 0 : 1)
+            }
+        }
+        .allowsHitTesting(false)
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.1)) { spread = true }
+        }
+    }
+}
+
+/// A small ring that empties as the settle countdown runs out.
+private struct CountdownRing: View {
+    let progress: Double
+
+    var body: some View {
+        ZStack {
+            Circle().stroke(.secondary.opacity(0.25), lineWidth: 2)
+            Circle()
+                .trim(from: 0, to: max(0, min(1, 1 - progress)))
+                .stroke(.cyan, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: 11, height: 11)
+    }
+}
+
+/// Frozen while it settles; the countdown sits under the shell. A message that was
+/// just held plays the freeze: it shows as a normal blue bubble first, then frosts
+/// over with a burst of snowflakes (the heavy haptic comes from `ChatStore`).
 struct SettlingBubble: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let record: CalmMessage
+    @State private var frozen: Bool
+    @State private var burst: UUID?
+    @State private var pulse = false
+
+    init(record: CalmMessage) {
+        self.record = record
+        _frozen = State(initialValue: record.state != .scoring)
+    }
 
     var body: some View {
         let _ = app.clockRevision
         VStack(alignment: .trailing, spacing: 5) {
-            FrozenShell(text: record.text)
+            FrozenShell(text: record.text, frozen: frozen)
+                .scaleEffect(pulse ? 1.05 : 1, anchor: .trailing)
+                .overlay {
+                    if let burst { SnowBurst().id(burst) }
+                }
             if record.state != .scoring {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    StatusLine(text: countdown, systemImage: "snowflake")
+                    HStack(spacing: 4) {
+                        CountdownRing(progress: progress)
+                        StatusLine(text: countdown)
+                    }
                 }
+                .transition(.opacity)
             }
         }
         .frame(maxWidth: 290, alignment: .trailing)
+        .onChange(of: record.state) { old, new in
+            if new == .settling, old == .scoring || old == .rescoring { freeze() }
+        }
+        .onAppear {
+            // exyte may rebuild the row when the state changes; a row that appears
+            // already settled moments after it was sent still plays the freeze.
+            if record.state == .settling, app.now.timeIntervalSince(record.createdAt) < 1.2 { freeze() }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("沉淀中的消息：\(record.text)。\(countdown)")
         .accessibilityHint("轻点选择怎么处理")
         .accessibilityAddTraits(.isButton)
+    }
+
+    private func freeze() {
+        guard !reduceMotion else {
+            frozen = true
+            return
+        }
+        frozen = false
+        burst = UUID()
+        withAnimation(.spring(duration: 0.25)) { pulse = true }
+        withAnimation(.spring(duration: 0.8, bounce: 0.3).delay(0.12)) {
+            frozen = true
+            pulse = false
+        }
+    }
+
+    /// How much of the settle time has passed, 0…1.
+    private var progress: Double {
+        guard let until = record.settleUntil else { return 0 }
+        let total = until.timeIntervalSince(record.createdAt)
+        guard total > 0 else { return 1 }
+        return app.now.timeIntervalSince(record.createdAt) / total
     }
 
     private var countdown: String {
@@ -262,23 +364,65 @@ struct ReadyBubble: View {
     }
 }
 
-/// Letting go: the frozen bubble slowly blurs and fades away.
+/// Letting go: the frozen bubble breaks into specks of ice that drift up and away.
 struct DissolveBubble: View {
     static let duration: Duration = .seconds(1.6)
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let record: CalmMessage
     @State private var gone = false
+    @State private var start = Date()
 
     var body: some View {
         FrozenShell(text: record.text, tint: .gray)
-            .frame(maxWidth: 290, alignment: .trailing)
-            .blur(radius: gone && !reduceMotion ? 14 : 0)
-            .scaleEffect(gone && !reduceMotion ? 0.92 : 1, anchor: .trailing)
+            .blur(radius: gone && !reduceMotion ? 10 : 0)
+            .scaleEffect(gone && !reduceMotion ? 0.94 : 1, anchor: .trailing)
             .opacity(gone ? 0 : 1)
+            .overlay {
+                if !reduceMotion {
+                    GeometryReader { geo in
+                        IceDust(size: geo.size, start: start)
+                    }
+                    .allowsHitTesting(false)
+                }
+            }
+            .frame(maxWidth: 290, alignment: .trailing)
             .onAppear {
-                withAnimation(.easeIn(duration: 1.5)) { gone = true }
+                start = Date()
+                withAnimation(.easeIn(duration: 0.9)) { gone = true }
             }
             .accessibilityHidden(true)
+    }
+}
+
+/// Particles spread over the bubble's area that drift up and to the right and fade out.
+private struct IceDust: View {
+    let size: CGSize
+    let start: Date
+    private static let count = 70
+    private static let life = 1.5
+
+    var body: some View {
+        TimelineView(.animation) { context in
+            let t = context.date.timeIntervalSince(start)
+            Canvas { canvas, canvasSize in
+                for i in 0..<Self.count {
+                    // Each speck appears a little later the further right it starts.
+                    let delay = noise(i, 1) * 0.35
+                    let age = (t - delay) / Self.life
+                    guard age > 0, age < 1 else { continue }
+                    let eased = 1 - pow(1 - age, 2)
+                    let x0 = 40 + noise(i, 2) * size.width
+                    let y0 = 40 + noise(i, 3) * size.height
+                    let x = x0 + (20 + noise(i, 4) * 50) * eased
+                    let y = y0 - (30 + noise(i, 5) * 70) * eased
+                    let r = 1 + noise(i, 6) * 2.2
+                    let color: Color = noise(i, 7) > 0.5 ? .cyan : .white
+                    canvas.fill(Path(ellipseIn: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)), with: .color(color.opacity(0.9 * (1 - age))))
+                }
+            }
+            .frame(width: size.width + 80, height: size.height + 80)
+            .offset(x: -40, y: -40)
+        }
     }
 }
