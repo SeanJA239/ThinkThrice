@@ -1,0 +1,49 @@
+# XcodeGen spec. ThinkThrice.xcodeproj is generated from this file and committed,
+# so opening the project needs no extra tools. After editing this file, run
+# `xcodegen generate` (brew install xcodegen) and commit both.
+name: ThinkThrice
+options:
+  bundleIdPrefix: com.thinkthrice
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+packages:
+  ExyteChat:
+    url: https://github.com/exyte/Chat.git
+    exactVersion: 3.3.7
+  CalmCore:
+    path: CalmCore
+targets:
+  ThinkThrice:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+        excludes:
+          - "**/*.md"
+    dependencies:
+      - package: ExyteChat
+      - package: CalmCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.thinkthrice.app
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: ThinkThrice
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+schemes:
+  ThinkThrice:
+    build:
+      targets:
+        ThinkThrice: all
+    test:
+      targets: []

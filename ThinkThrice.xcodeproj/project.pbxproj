@@ -1,0 +1,462 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04A36B02A2B35E9CD3FD43AA /* CalmCore in Frameworks */ = {isa = PBXBuildFile; productRef = C850B1F949F52DDEDD022F12 /* CalmCore */; };
+		161042CF6FA5E96699981C53 /* ThinkThriceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */; };
+		1FB63148949A97BC0DA870A4 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D4C506115F14561F38F7B6 /* AppModel.swift */; };
+		2244ECDE3E5F7F964E5D0F3E /* Scripts.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A399F366DBCF659EB31D707 /* Scripts.json */; };
+		3715FC2A26A92A4D35433D24 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C004345BA3473A92A23C028F /* Notifications.swift */; };
+		38E2AE136CE102528C9B2BA7 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B58B8B9CADF74B0A748B58D /* ChatStore.swift */; };
+		40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */; };
+		56A2A619B5E17F5D42268471 /* InputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2067BB54D63FBA1776430549 /* InputBar.swift */; };
+		6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42564C269EC6E4B2B8034FA7 /* MeltEditor.swift */; };
+		8947E32BDDE840B4F0A93E03 /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152C9D1FC299ADF363C23AA6 /* Content.swift */; };
+		91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */; };
+		B0E058615DC1A6A9B8CBDDEC /* HeldBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E928CE2D83F06E51DA6874B /* HeldBubbles.swift */; };
+		B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B066620A1EA312BB709DD32D /* ActionPanel.swift */; };
+		BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D326594331CC0E301BAE37 /* DebugClockPanel.swift */; };
+		D5D61A5F6CD1CDF19766792B /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB42A16EC1F61B273389275 /* ConversationListView.swift */; };
+		D7E0F71D3DCF8E47D7DE89D5 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 67AE1CE8C5E5ED1B956A2075 /* ExyteChat */; };
+		E7040887459B1A807DC6BB72 /* RitualSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8D4BD3DE977D8775275059 /* RitualSheet.swift */; };
+		E76B83F6E3619328BDD1D439 /* Questions.json in Resources */ = {isa = PBXBuildFile; fileRef = 7902B4B9E729879CB13B948B /* Questions.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		152C9D1FC299ADF363C23AA6 /* Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
+		1E928CE2D83F06E51DA6874B /* HeldBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeldBubbles.swift; sourceTree = "<group>"; };
+		2067BB54D63FBA1776430549 /* InputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputBar.swift; sourceTree = "<group>"; };
+		32D326594331CC0E301BAE37 /* DebugClockPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugClockPanel.swift; sourceTree = "<group>"; };
+		3A399F366DBCF659EB31D707 /* Scripts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Scripts.json; sourceTree = "<group>"; };
+		42564C269EC6E4B2B8034FA7 /* MeltEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeltEditor.swift; sourceTree = "<group>"; };
+		44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSheet.swift; sourceTree = "<group>"; };
+		5B58B8B9CADF74B0A748B58D /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
+		61D4C506115F14561F38F7B6 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreen.swift; sourceTree = "<group>"; };
+		7902B4B9E729879CB13B948B /* Questions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Questions.json; sourceTree = "<group>"; };
+		9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkThriceApp.swift; sourceTree = "<group>"; };
+		B066620A1EA312BB709DD32D /* ActionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPanel.swift; sourceTree = "<group>"; };
+		C004345BA3473A92A23C028F /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
+		C38F3539674AF75839A10F82 /* CalmCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CalmCore; path = CalmCore; sourceTree = SOURCE_ROOT; };
+		CCB42A16EC1F61B273389275 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
+		CD8D4BD3DE977D8775275059 /* RitualSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualSheet.swift; sourceTree = "<group>"; };
+		DEB771C66A66B2EACD99309A /* ThinkThrice.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ThinkThrice.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C52DAB35E8DAE494CA3DF1C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7E0F71D3DCF8E47D7DE89D5 /* ExyteChat in Frameworks */,
+				04A36B02A2B35E9CD3FD43AA /* CalmCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0559A9FA46A84781F0887AA2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				61D4C506115F14561F38F7B6 /* AppModel.swift */,
+				6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */,
+				5B58B8B9CADF74B0A748B58D /* ChatStore.swift */,
+				152C9D1FC299ADF363C23AA6 /* Content.swift */,
+				CCB42A16EC1F61B273389275 /* ConversationListView.swift */,
+				32D326594331CC0E301BAE37 /* DebugClockPanel.swift */,
+				2067BB54D63FBA1776430549 /* InputBar.swift */,
+				C004345BA3473A92A23C028F /* Notifications.swift */,
+				9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */,
+				376E31CE649E2EC1F3790325 /* Bubbles */,
+				D0DC1D72680BCC866B8412C9 /* Resources */,
+				7DCA953E1D8AE2B682C8E0AB /* Sheets */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		22D4527F13237C0CFD460B16 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DEB771C66A66B2EACD99309A /* ThinkThrice.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		376E31CE649E2EC1F3790325 /* Bubbles */ = {
+			isa = PBXGroup;
+			children = (
+				1E928CE2D83F06E51DA6874B /* HeldBubbles.swift */,
+			);
+			path = Bubbles;
+			sourceTree = "<group>";
+		};
+		7DCA953E1D8AE2B682C8E0AB /* Sheets */ = {
+			isa = PBXGroup;
+			children = (
+				B066620A1EA312BB709DD32D /* ActionPanel.swift */,
+				44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */,
+				42564C269EC6E4B2B8034FA7 /* MeltEditor.swift */,
+				CD8D4BD3DE977D8775275059 /* RitualSheet.swift */,
+			);
+			path = Sheets;
+			sourceTree = "<group>";
+		};
+		9172DFDACF09DD8059DC4E99 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				C38F3539674AF75839A10F82 /* CalmCore */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		C74822B02C440BBA79B5913F = {
+			isa = PBXGroup;
+			children = (
+				0559A9FA46A84781F0887AA2 /* App */,
+				9172DFDACF09DD8059DC4E99 /* Packages */,
+				22D4527F13237C0CFD460B16 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D0DC1D72680BCC866B8412C9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7902B4B9E729879CB13B948B /* Questions.json */,
+				3A399F366DBCF659EB31D707 /* Scripts.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		55BE8C4D3A49B485B60744C9 /* ThinkThrice */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE43CB9949A5AEF4BDB6C706 /* Build configuration list for PBXNativeTarget "ThinkThrice" */;
+			buildPhases = (
+				C5F2A9DB03C873D5FA0E8E64 /* Sources */,
+				C046D4C107C76300DBCC7109 /* Resources */,
+				C52DAB35E8DAE494CA3DF1C4 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ThinkThrice;
+			packageProductDependencies = (
+				67AE1CE8C5E5ED1B956A2075 /* ExyteChat */,
+				C850B1F949F52DDEDD022F12 /* CalmCore */,
+			);
+			productName = ThinkThrice;
+			productReference = DEB771C66A66B2EACD99309A /* ThinkThrice.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		973664A6E1A5C29C82CAE8C8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					55BE8C4D3A49B485B60744C9 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 0BD8003FEA4D7066BB7B2A17 /* Build configuration list for PBXProject "ThinkThrice" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = C74822B02C440BBA79B5913F;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E95173C1CC29A7AFC8087AA7 /* XCRemoteSwiftPackageReference "Chat" */,
+				31A458A24689770FD94FF56F /* XCLocalSwiftPackageReference "CalmCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 22D4527F13237C0CFD460B16 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				55BE8C4D3A49B485B60744C9 /* ThinkThrice */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C046D4C107C76300DBCC7109 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E76B83F6E3619328BDD1D439 /* Questions.json in Resources */,
+				2244ECDE3E5F7F964E5D0F3E /* Scripts.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C5F2A9DB03C873D5FA0E8E64 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */,
+				1FB63148949A97BC0DA870A4 /* AppModel.swift in Sources */,
+				40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */,
+				38E2AE136CE102528C9B2BA7 /* ChatStore.swift in Sources */,
+				91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */,
+				8947E32BDDE840B4F0A93E03 /* Content.swift in Sources */,
+				D5D61A5F6CD1CDF19766792B /* ConversationListView.swift in Sources */,
+				BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */,
+				B0E058615DC1A6A9B8CBDDEC /* HeldBubbles.swift in Sources */,
+				56A2A619B5E17F5D42268471 /* InputBar.swift in Sources */,
+				6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */,
+				3715FC2A26A92A4D35433D24 /* Notifications.swift in Sources */,
+				E7040887459B1A807DC6BB72 /* RitualSheet.swift in Sources */,
+				161042CF6FA5E96699981C53 /* ThinkThriceApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DAEA3B84DB7D9BF630F8D75 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		578300038983E52735AB3BCE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ThinkThrice;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinkthrice.app;
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		5DACC7294D5384C1864A6C51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		E7A53632D8C0DC4E1D86D98F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ThinkThrice;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinkthrice.app;
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0BD8003FEA4D7066BB7B2A17 /* Build configuration list for PBXProject "ThinkThrice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DAEA3B84DB7D9BF630F8D75 /* Debug */,
+				5DACC7294D5384C1864A6C51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DE43CB9949A5AEF4BDB6C706 /* Build configuration list for PBXNativeTarget "ThinkThrice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				578300038983E52735AB3BCE /* Debug */,
+				E7A53632D8C0DC4E1D86D98F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		31A458A24689770FD94FF56F /* XCLocalSwiftPackageReference "CalmCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = CalmCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E95173C1CC29A7AFC8087AA7 /* XCRemoteSwiftPackageReference "Chat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/Chat.git";
+			requirement = {
+				kind = exactVersion;
+				version = 3.3.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		67AE1CE8C5E5ED1B956A2075 /* ExyteChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E95173C1CC29A7AFC8087AA7 /* XCRemoteSwiftPackageReference "Chat" */;
+			productName = ExyteChat;
+		};
+		C850B1F949F52DDEDD022F12 /* CalmCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CalmCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 973664A6E1A5C29C82CAE8C8 /* Project object */;
+}
