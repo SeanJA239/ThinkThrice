@@ -4,24 +4,47 @@ struct ConversationListView: View {
     @Environment(AppModel.self) private var app
     @AppStorage("profileName") private var profileName = "我"
     @State private var showProfile = false
+    @State private var query = ""
 
-    /// Pinned conversations first, otherwise in their original order.
+    /// Pinned conversations first, otherwise in their original order, filtered
+    /// by the search box (name or note).
     private var stores: [ChatStore] {
-        app.stores.enumerated()
+        let q = query.trimmingCharacters(in: .whitespaces)
+        return app.stores.enumerated()
+            .filter { q.isEmpty || $0.element.displayName.localizedCaseInsensitiveContains(q) || $0.element.peer.name.localizedCaseInsensitiveContains(q) }
             .sorted { ($0.element.pinned ? 0 : 1, $0.offset) < ($1.element.pinned ? 0 : 1, $1.offset) }
             .map(\.element)
     }
 
     var body: some View {
         NavigationStack {
-            List(stores) { store in
-                NavigationLink {
-                    ChatScreen(store: store)
-                } label: {
-                    ConversationRow(store: store)
+            List {
+                // Our own search field as the first row: the system `.searchable`
+                // drawer collapsed the large 「聊天」 title into a small one.
+                Section {
+                    SearchField(text: $query)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                }
+                Section {
+                    ForEach(stores) { store in
+                        NavigationLink {
+                            ChatScreen(store: store)
+                        } label: {
+                            ConversationRow(store: store)
+                        }
+                    }
+                } footer: {
+                    if stores.isEmpty, !query.isEmpty {
+                        Text("没有找到「\(query)」")
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 24)
+                    }
                 }
             }
+            .listSectionSpacing(12)
             .navigationTitle("聊天")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { showProfile = true } label: {
@@ -81,5 +104,33 @@ private struct ConversationRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// 「搜索联系人」 under the 「聊天」 title: a Liquid Glass capsule that filters by name or note.
+private struct SearchField: View {
+    @Binding var text: String
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+            TextField("搜索联系人", text: $text)
+                .focused($focused)
+                .submitLabel(.search)
+                .accessibilityIdentifier("contactSearch")
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("清除")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .glassEffect(.regular.interactive(), in: .capsule)
     }
 }

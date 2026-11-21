@@ -25,7 +25,7 @@ struct ProfileView: View {
                         Label {
                             Text(status.label)
                         } icon: {
-                            Image(systemName: status.symbol).foregroundStyle(Theme.brand)
+                            Image(systemName: status.symbol).foregroundStyle(status.color)
                         }
                             .font(.footnote.weight(.medium))
                             .padding(.horizontal, 10)

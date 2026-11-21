@@ -2,6 +2,7 @@ import CalmCore
 import ExyteChat
 import Foundation
 import Observation
+import SwiftUI
 
 /// One conversation. exyte's `Message` is only for display; the settle state of
 /// each outgoing message lives in `records`, keyed by message id, and only the
@@ -53,6 +54,15 @@ final class ChatStore: Identifiable {
             case .calm: "冷静中"
             case .busy: "忙碌"
             case .offline: "显示离线"
+            }
+        }
+        /// The status light: green when online, like the dot on the chat header.
+        var color: Color {
+            switch self {
+            case .auto: .green
+            case .calm: Theme.ice
+            case .busy: .orange
+            case .offline: .gray
             }
         }
         var symbol: String {

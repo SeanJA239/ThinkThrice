@@ -80,8 +80,8 @@ struct ContactPanel: View {
                     .contentShape(.capsule)
             }
             .buttonStyle(.plain)
-            // Clear, untinted Liquid Glass.
-            .glassEffect(.clear.interactive(), in: .capsule)
+            // Clear, untinted Liquid Glass, faded so the card shows through more.
+            .background { FadedGlass(shape: Capsule(), interactive: true) }
 
             VStack(spacing: 0) {
                 row {
@@ -95,8 +95,11 @@ struct ContactPanel: View {
                 Divider()
                 row { Toggle("置顶聊天", isOn: $store.pinned) }
             }
+            // iOS 26 switches already turn into Liquid Glass while dragged; the
+            // group behind them is clear glass too, not a white block.
+            .tint(Theme.brand)
             .padding(.horizontal, 14)
-            .background(.background.opacity(0.5), in: .rect(cornerRadius: 16))
+            .background { FadedGlass(shape: RoundedRectangle(cornerRadius: 16)) }
         }
         .padding(18)
     }
@@ -136,5 +139,19 @@ struct ContactPanel: View {
         .foregroundStyle(Theme.brand)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 14))
         .accessibilityLabel(title)
+    }
+}
+
+/// Clear Liquid Glass, faded: glass inside the glass card otherwise renders as
+/// a near-white block, so its layer is drawn at partial opacity.
+private struct FadedGlass<S: Shape>: View {
+    let shape: S
+    var interactive = false
+
+    var body: some View {
+        shape
+            .fill(.clear)
+            .glassEffect(interactive ? .clear.interactive() : .clear, in: shape)
+            .opacity(0.3)
     }
 }
