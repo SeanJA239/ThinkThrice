@@ -11,6 +11,7 @@
 		161042CF6FA5E96699981C53 /* ThinkThriceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */; };
 		1FB63148949A97BC0DA870A4 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D4C506115F14561F38F7B6 /* AppModel.swift */; };
 		2244ECDE3E5F7F964E5D0F3E /* Scripts.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A399F366DBCF659EB31D707 /* Scripts.json */; };
+		23AFC753423360A0B03280DF /* MessageBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */; };
 		3715FC2A26A92A4D35433D24 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C004345BA3473A92A23C028F /* Notifications.swift */; };
 		38E2AE136CE102528C9B2BA7 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B58B8B9CADF74B0A748B58D /* ChatStore.swift */; };
 		40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */; };
@@ -18,7 +19,6 @@
 		6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42564C269EC6E4B2B8034FA7 /* MeltEditor.swift */; };
 		8947E32BDDE840B4F0A93E03 /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152C9D1FC299ADF363C23AA6 /* Content.swift */; };
 		91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */; };
-		B0E058615DC1A6A9B8CBDDEC /* HeldBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E928CE2D83F06E51DA6874B /* HeldBubbles.swift */; };
 		B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B066620A1EA312BB709DD32D /* ActionPanel.swift */; };
 		BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D326594331CC0E301BAE37 /* DebugClockPanel.swift */; };
 		D5D61A5F6CD1CDF19766792B /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB42A16EC1F61B273389275 /* ConversationListView.swift */; };
@@ -29,7 +29,6 @@
 
 /* Begin PBXFileReference section */
 		152C9D1FC299ADF363C23AA6 /* Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
-		1E928CE2D83F06E51DA6874B /* HeldBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeldBubbles.swift; sourceTree = "<group>"; };
 		2067BB54D63FBA1776430549 /* InputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputBar.swift; sourceTree = "<group>"; };
 		32D326594331CC0E301BAE37 /* DebugClockPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugClockPanel.swift; sourceTree = "<group>"; };
 		3A399F366DBCF659EB31D707 /* Scripts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Scripts.json; sourceTree = "<group>"; };
@@ -41,6 +40,7 @@
 		7902B4B9E729879CB13B948B /* Questions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Questions.json; sourceTree = "<group>"; };
 		9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkThriceApp.swift; sourceTree = "<group>"; };
 		B066620A1EA312BB709DD32D /* ActionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPanel.swift; sourceTree = "<group>"; };
+		BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbles.swift; sourceTree = "<group>"; };
 		C004345BA3473A92A23C028F /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		C38F3539674AF75839A10F82 /* CalmCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CalmCore; path = CalmCore; sourceTree = SOURCE_ROOT; };
 		CCB42A16EC1F61B273389275 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
@@ -91,7 +91,7 @@
 		376E31CE649E2EC1F3790325 /* Bubbles */ = {
 			isa = PBXGroup;
 			children = (
-				1E928CE2D83F06E51DA6874B /* HeldBubbles.swift */,
+				BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */,
 			);
 			path = Bubbles;
 			sourceTree = "<group>";
@@ -220,9 +220,9 @@
 				8947E32BDDE840B4F0A93E03 /* Content.swift in Sources */,
 				D5D61A5F6CD1CDF19766792B /* ConversationListView.swift in Sources */,
 				BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */,
-				B0E058615DC1A6A9B8CBDDEC /* HeldBubbles.swift in Sources */,
 				56A2A619B5E17F5D42268471 /* InputBar.swift in Sources */,
 				6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */,
+				23AFC753423360A0B03280DF /* MessageBubbles.swift in Sources */,
 				3715FC2A26A92A4D35433D24 /* Notifications.swift in Sources */,
 				E7040887459B1A807DC6BB72 /* RitualSheet.swift in Sources */,
 				161042CF6FA5E96699981C53 /* ThinkThriceApp.swift in Sources */,

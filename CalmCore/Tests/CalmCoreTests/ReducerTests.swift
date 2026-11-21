@@ -195,3 +195,48 @@ func apply(_ message: CalmMessage, _ events: [SettleEvent], now: Date) -> CalmMe
         #expect(!SettleState.delivered.isHeld)
     }
 }
+
+@Suite struct RelaunchTests {
+    let settling = sent("a", score: 0.9, at: at(22, 1, 30))
+
+    @Test func openSheetsFallBackToSettlingWithTheSameCountdown() {
+        let ritual = apply(settling, [.startRitual, .ritualNext], now: at(22, 1, 31))
+        let rewriting = apply(settling, [.startRewrite], now: at(22, 1, 31))
+        for m in [ritual, rewriting] {
+            let restored = reduce(m, .relaunched, now: at(22, 2), policy: policy)
+            #expect(restored.state == .settling)
+            #expect(restored.settleUntil == at(22, 9))
+        }
+    }
+
+    @Test func pendingRescoreKeepsTheRewriteAndIsReadyAfterTheCountdown() {
+        let rescoring = apply(settling, [.startRewrite, .submitRewrite("好吧")], now: at(22, 1, 31))
+        let restored = reduce(rescoring, .relaunched, now: at(22, 9, 30), policy: policy)
+        #expect(restored.state == .ready)
+        #expect(restored.text == "好吧")
+    }
+
+    @Test func confirmFallsBackToReady() {
+        let confirming = apply(settling, [.tick, .openConfirm], now: at(22, 9))
+        #expect(reduce(confirming, .relaunched, now: at(22, 10), policy: policy).state == .ready)
+    }
+
+    @Test func settlingThatPassedItsCountdownWhileClosedIsReady() {
+        #expect(reduce(settling, .relaunched, now: at(22, 9, 1), policy: policy).state == .ready)
+    }
+
+    @Test func dissolvingIsGoneAndOtherStatesAreUnchanged() {
+        let dissolving = apply(settling, [.letGo], now: at(22, 1, 31))
+        #expect(reduce(dissolving, .relaunched, now: at(22, 2), policy: policy).state == .dissolved)
+        let delivered = sent("b", score: 0.1, at: at(21, 14))
+        #expect(reduce(delivered, .relaunched, now: at(22, 2), policy: policy) == delivered)
+        let scoring = CalmMessage(text: "c", createdAt: at(22, 1))
+        #expect(reduce(scoring, .relaunched, now: at(22, 2), policy: policy) == scoring)
+    }
+
+    @Test func recordsSurviveAJSONRoundTrip() throws {
+        let m = apply(settling, [.startRewrite, .revealNext], now: at(22, 1, 31))
+        let decoded = try JSONDecoder().decode(CalmMessage.self, from: JSONEncoder().encode(m))
+        #expect(decoded == m)
+    }
+}

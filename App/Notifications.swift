@@ -28,6 +28,11 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
         center.add(UNNotificationRequest(identifier: record.id, content: content, trigger: trigger))
     }
 
+    func cancelAll() {
+        center.removeAllPendingNotificationRequests()
+        center.removeAllDeliveredNotifications()
+    }
+
     func cancel(id: String) {
         center.removePendingNotificationRequests(withIdentifiers: [id])
         center.removeDeliveredNotifications(withIdentifiers: [id])

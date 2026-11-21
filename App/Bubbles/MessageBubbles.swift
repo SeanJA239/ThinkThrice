@@ -2,32 +2,38 @@ import CalmCore
 import ExyteChat
 import SwiftUI
 
-/// The row for every message. Times are never drawn inside bubbles: as in
-/// iMessage, the newest delivered message gets 「已送达 9:00」 under it, and held
-/// messages show their countdown there instead.
+/// The row for every message, iMessage style: consecutive messages from one
+/// sender sit close together and the last one in the run gets a tail. Times are
+/// never drawn inside bubbles: the newest delivered message gets 「已送达 9:00」
+/// under it, and held messages show their countdown there instead.
 ///
-/// Outgoing messages (they all have a record) use our own bubbles; messages
-/// from the other side keep exyte's default bubble. Delivered outgoing messages
-/// don't use exyte's bubble either: it measures text with UIKit, which comes out
-/// narrower than SwiftUI's rendering of full-width punctuation, so near-one-line
-/// Chinese messages were cut off with 「…」.
+/// Every row uses our own bubbles rather than exyte's default one, which
+/// measures text with UIKit and cut off near-one-line Chinese messages with 「…」.
 struct CalmMessageCell: View {
     let params: MessageBuilderParameters
     let store: ChatStore
 
     var body: some View {
-        if let record = store.records[params.message.id] {
-            outgoing(record)
-        } else {
-            params.defaultMessageView()
+        let position = store.groupPosition(of: params.message.id)
+        Group {
+            if let record = store.records[params.message.id] {
+                outgoing(record, hasTail: position.isLast)
+            } else {
+                MessageBubble(text: params.message.text, isMe: false, hasTail: position.isLast)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel("\(params.message.user.name)：\(params.message.text)")
+            }
         }
+        .padding(.horizontal, 10)
+        .padding(.top, position.isFirst ? 10 : 1)
+        .padding(.bottom, 1)
     }
 
-    @ViewBuilder private func outgoing(_ record: CalmMessage) -> some View {
+    @ViewBuilder private func outgoing(_ record: CalmMessage, hasTail: Bool) -> some View {
         Group {
             switch record.state {
             case .delivered:
-                DeliveredBubble(record: record, showsStatus: store.lastDeliveredID == record.id)
+                DeliveredBubble(record: record, hasTail: hasTail, showsStatus: store.lastDeliveredID == record.id)
             case .ready:
                 ReadyBubble(record: record)
             case .dissolving, .dissolved:
@@ -37,10 +43,66 @@ struct CalmMessageCell: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 2)
         .contentShape(.rect)
         .onTapGesture { store.tap(record.id) }
+    }
+}
+
+/// An iMessage bubble outline. With a tail, the bottom corner on the sender's
+/// side sweeps out into a point; the body always leaves `tailWidth` free on
+/// that side so bubbles with and without a tail line up.
+nonisolated struct BubbleShape: Shape {
+    static let tailWidth: CGFloat = 5
+    var isMe: Bool
+    var hasTail: Bool
+
+    func path(in rect: CGRect) -> Path {
+        // Drawn with the tail on the left (received), then mirrored for sent messages.
+        let r = min(18, rect.height / 2)
+        let bodyMinX = rect.minX + Self.tailWidth
+        var path = Path()
+        if hasTail {
+            path.move(to: CGPoint(x: bodyMinX + r, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
+            path.addArc(tangent1End: CGPoint(x: rect.maxX, y: rect.minY), tangent2End: CGPoint(x: rect.maxX, y: rect.minY + r), radius: r)
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
+            path.addArc(tangent1End: CGPoint(x: rect.maxX, y: rect.maxY), tangent2End: CGPoint(x: rect.maxX - r, y: rect.maxY), radius: r)
+            // The tail: the bottom edge dips up into a small notch, sweeps out to
+            // the tip, then curves back up into the side, like iMessage.
+            let x = rect.minX, y = rect.maxY
+            path.addLine(to: CGPoint(x: x + 25, y: y))
+            path.addCurve(to: CGPoint(x: x + 12, y: y - 4), control1: CGPoint(x: x + 21, y: y), control2: CGPoint(x: x + 17, y: y))
+            path.addCurve(to: CGPoint(x: x, y: y), control1: CGPoint(x: x + 9, y: y - 1), control2: CGPoint(x: x + 4, y: y + 0.5))
+            path.addCurve(to: CGPoint(x: bodyMinX, y: y - 11), control1: CGPoint(x: x, y: y), control2: CGPoint(x: bodyMinX, y: y - 1))
+            path.addLine(to: CGPoint(x: bodyMinX, y: rect.minY + r))
+            path.addArc(tangent1End: CGPoint(x: bodyMinX, y: rect.minY), tangent2End: CGPoint(x: bodyMinX + r, y: rect.minY), radius: r)
+            path.closeSubpath()
+        } else {
+            let body = CGRect(x: bodyMinX, y: rect.minY, width: rect.width - Self.tailWidth, height: rect.height)
+            path.addRoundedRect(in: body, cornerSize: CGSize(width: r, height: r), style: .continuous)
+        }
+        guard isMe else { return path }
+        return path.applying(CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: rect.minX + rect.maxX, ty: 0))
+    }
+}
+
+/// A plain bubble: system blue for my messages, system gray for theirs.
+struct MessageBubble: View {
+    let text: String
+    let isMe: Bool
+    let hasTail: Bool
+
+    var body: some View {
+        Text(text)
+            .font(.body)
+            .foregroundStyle(isMe ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .padding(isMe ? .trailing : .leading, BubbleShape.tailWidth)
+            .background(isMe ? Color.blue : Color(.systemGray5), in: BubbleShape(isMe: isMe, hasTail: hasTail))
+            .frame(maxWidth: 290, alignment: isMe ? .trailing : .leading)
     }
 }
 
@@ -64,39 +126,39 @@ private struct StatusLine: View {
     }
 }
 
-/// A solid sent bubble. When a held message has just been delivered, it turns
-/// from glass to solid inside the bubble. Only the newest delivered message
-/// shows 「已送达」 and its delivery time under it.
+/// A sent bubble. When a held message has just been delivered, it turns from
+/// glass to solid blue in place. Only the newest delivered message shows
+/// 「已送达」 and its delivery time under it.
 struct DeliveredBubble: View {
     @Environment(AppModel.self) private var app
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.chatTheme) private var theme
     let record: CalmMessage
+    let hasTail: Bool
     let showsStatus: Bool
     @State private var solid = true
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 3) {
             Text(record.text)
-                // .subheadline is 15 pt at the default size, like exyte's bubbles, and scales with Dynamic Type.
-                .font(.subheadline)
-                .foregroundStyle(solid ? AnyShapeStyle(theme.colors.messageMyText) : AnyShapeStyle(.primary.opacity(0.55)))
+                .font(.body)
+                .foregroundStyle(solid ? AnyShapeStyle(.white) : AnyShapeStyle(.primary.opacity(0.55)))
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .padding(.trailing, BubbleShape.tailWidth)
                 .background {
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(theme.colors.messageMyBG)
+                    BubbleShape(isMe: true, hasTail: hasTail)
+                        .fill(Color.blue)
                         .opacity(solid ? 1 : 0)
                 }
-                .glassEffect(.regular.tint(.cyan.opacity(solid ? 0 : 0.2)), in: .rect(cornerRadius: 18))
+                .glassEffect(.regular.tint(.cyan.opacity(solid ? 0 : 0.2)), in: BubbleShape(isMe: true, hasTail: hasTail))
             if showsStatus {
                 StatusLine(emphasis: "已送达", text: time)
                     .transition(.opacity)
             }
         }
-        .frame(maxWidth: 280, alignment: .trailing)
+        .frame(maxWidth: 290, alignment: .trailing)
         .onAppear(perform: animateIfJustDelivered)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("我：\(record.text)")
@@ -120,20 +182,19 @@ struct DeliveredBubble: View {
 /// A held message: the bubble it would have been, muted and frozen inside a
 /// thick Liquid Glass shell. The text can't be selected or copied.
 private struct FrozenShell: View {
-    @Environment(\.chatTheme) private var theme
     let text: String
     var tint: Color = .cyan
 
     var body: some View {
         Text(text)
-            .font(.subheadline)
+            .font(.body)
             .foregroundStyle(.white.opacity(0.9))
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
             .textSelection(.disabled)
             .padding(.horizontal, 14)
-            .padding(.vertical, 9)
-            .background(theme.colors.messageMyBG.opacity(0.4), in: .rect(cornerRadius: 18))
+            .padding(.vertical, 7)
+            .background(Color.blue.opacity(0.4), in: .rect(cornerRadius: 18, style: .continuous))
             .saturation(0.6)
             .padding(7)
             .glassEffect(.clear.tint(tint.opacity(0.22)).interactive(), in: .rect(cornerRadius: 25))

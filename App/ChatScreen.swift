@@ -59,7 +59,8 @@ struct ChatScreen: View {
 }
 
 /// The contact bar: avatar, name and status in a Liquid Glass capsule. The status
-/// reads 「在线」 or 「正在输入…」, plus the demo time while the demo clock is shifted.
+/// reads 「在线」, 「正在输入…」 or, for a two-phone conversation, the connection
+/// state, plus the demo time while the demo clock is shifted.
 struct ChatHeader: View {
     @Environment(AppModel.self) private var app
     let store: ChatStore
@@ -73,7 +74,7 @@ struct ChatHeader: View {
                 .background(.indigo.gradient, in: .circle)
                 .overlay(alignment: .bottomTrailing) {
                     Circle()
-                        .fill(.green)
+                        .fill(dotColor)
                         .frame(width: 10, height: 10)
                         .overlay(Circle().stroke(.background, lineWidth: 2))
                 }
@@ -91,6 +92,7 @@ struct ChatHeader: View {
         .glassEffect(.regular.interactive(), in: .capsule)
         .contentShape(.capsule)
         .animation(.smooth, value: store.peerIsTyping)
+        .animation(.smooth, value: store.presence)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("chatHeader")
     }
@@ -98,7 +100,7 @@ struct ChatHeader: View {
     @ViewBuilder private var statusLine: some View {
         let _ = app.clockRevision
         HStack(spacing: 0) {
-            Text(store.peerIsTyping ? "正在输入…" : "在线")
+            Text(statusText)
                 .foregroundStyle(store.peerIsTyping ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
                 .contentTransition(.opacity)
             if app.clock.isShifted {
@@ -108,5 +110,22 @@ struct ChatHeader: View {
         }
         .font(.caption2)
         .lineLimit(1)
+    }
+
+    private var statusText: String {
+        if store.peerIsTyping { return "正在输入…" }
+        switch store.presence {
+        case .online: return "在线"
+        case .searching: return "正在寻找附近的手机…"
+        case .disconnected: return "连接断开，正在重连…"
+        }
+    }
+
+    private var dotColor: Color {
+        switch store.presence {
+        case .online: .green
+        case .searching: .orange
+        case .disconnected: .gray
+        }
     }
 }

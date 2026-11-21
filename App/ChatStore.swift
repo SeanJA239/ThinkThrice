@@ -37,26 +37,70 @@ final class ChatStore: Identifiable {
     private(set) var peerIsTyping = false
     private var repliesInFlight = 0
 
+    /// Whether the other side can be reached. Scripted peers are always online;
+    /// a two-phone conversation follows its connection.
+    enum Presence { case online, searching, disconnected }
+    private(set) var presence: Presence = .online
+
     private unowned let app: AppModel
     private let transport: any MessageTransport
+    /// How many scripted replies have arrived, saved so a relaunch continues the script.
+    private var repliesUsed = 0
 
     var id: String { conversation.id }
 
-    init(conversation: Content.Conversation, app: AppModel) {
+    /// With a `p2pRole`, the other side is a second phone instead of the script.
+    init(conversation: Content.Conversation, app: AppModel, p2pRole: P2PTransport.Role? = nil) {
         self.conversation = conversation
         self.app = app
         peer = User(id: conversation.id, name: conversation.name, avatarURL: nil, isCurrentUser: false)
-        transport = ScriptedTransport(replies: conversation.replies, clock: app.clock)
-        let start = app.now.addingTimeInterval(-Double(conversation.seed.count) * 60)
-        messages = conversation.seed.enumerated().map { index, text in
-            Message(id: UUID().uuidString, user: peer, createdAt: start.addingTimeInterval(Double(index) * 60), text: text)
+        let archive = ConversationArchive.load(id: conversation.id)
+        let repliesUsed = archive?.repliesUsed ?? 0
+        self.repliesUsed = repliesUsed
+        if let p2pRole {
+            let p2p = P2PTransport(role: p2pRole)
+            transport = p2p
+            presence = .searching
+            followStatus(of: p2p)
+        } else {
+            transport = ScriptedTransport(replies: Array(conversation.replies.dropFirst(repliesUsed)), clock: app.clock)
+        }
+        if let archive {
+            restore(archive)
+        } else {
+            let start = app.now.addingTimeInterval(-Double(conversation.seed.count) * 60)
+            messages = conversation.seed.enumerated().map { index, text in
+                Message(id: UUID().uuidString, user: peer, createdAt: start.addingTimeInterval(Double(index) * 60), text: text)
+            }
+            save()
         }
         listen()
+    }
+
+    /// Stops a two-phone connection. Call before dropping the store.
+    func stop() {
+        (transport as? P2PTransport)?.stop()
     }
 
     /// The newest delivered outgoing message, the only one that shows 「已送达」.
     var lastDeliveredID: String? {
         messages.last { records[$0.id]?.state == .delivered }?.id
+    }
+
+    /// Where a row sits in its run of consecutive messages from one sender, iMessage
+    /// style: the first gets extra space above, the last gets the tail. Held messages
+    /// stand alone, so a frozen bubble never joins a group.
+    func groupPosition(of id: String) -> (isFirst: Bool, isLast: Bool) {
+        guard let index = messages.firstIndex(where: { $0.id == id }) else { return (true, true) }
+        func isHeld(_ message: Message) -> Bool {
+            records[message.id].map { $0.state != .delivered } ?? false
+        }
+        func joins(_ a: Int, _ b: Int) -> Bool {
+            messages[a].user.id == messages[b].user.id && !isHeld(messages[a]) && !isHeld(messages[b])
+        }
+        let isFirst = index == 0 || !joins(index - 1, index)
+        let isLast = index == messages.count - 1 || !joins(index, index + 1)
+        return (isFirst, isLast)
     }
 
     var lastMessagePreview: String {
@@ -72,7 +116,8 @@ final class ChatStore: Identifiable {
         guard !trimmed.isEmpty else { return }
         let record = CalmMessage(text: trimmed, createdAt: app.now)
         records[record.id] = record
-        messages.append(Message(id: record.id, user: Self.me, status: .sending, createdAt: record.createdAt, text: record.text))
+        messages.append(Self.display(record))
+        save()
         score(record.text) { [weak self] score in
             self?.send(record.id, .scored(score))
         }
@@ -86,6 +131,7 @@ final class ChatStore: Identifiable {
         records[id] = new
         updateDisplay(new)
         runEffects(from: old, to: new)
+        save()
     }
 
     func submitRewrite(_ id: String, text: String) {
@@ -159,15 +205,19 @@ final class ChatStore: Identifiable {
         }
     }
 
-    private func updateDisplay(_ record: CalmMessage) {
-        guard let index = messages.firstIndex(where: { $0.id == record.id }) else { return }
-        var message = Message(
+    private static func display(_ record: CalmMessage) -> Message {
+        Message(
             id: record.id,
-            user: Self.me,
+            user: me,
             status: record.state == .delivered ? .sent : .sending,
             createdAt: record.createdAt,
             text: record.text
         )
+    }
+
+    private func updateDisplay(_ record: CalmMessage) {
+        guard let index = messages.firstIndex(where: { $0.id == record.id }) else { return }
+        var message = Self.display(record)
         // Forces exyte to redraw the row even when only the settle state changed.
         message.triggerRedraw = UUID()
         messages[index] = message
@@ -179,8 +229,54 @@ final class ChatStore: Identifiable {
             for await wire in incoming {
                 guard let self else { return }
                 self.messages.append(Message(id: wire.id, user: self.peer, createdAt: wire.sentAt, text: wire.text))
+                self.repliesUsed += 1
+                self.save()
             }
         }
+    }
+
+    private func followStatus(of p2p: P2PTransport) {
+        let updates = p2p.statusUpdates
+        Task { [weak self] in
+            for await status in updates {
+                switch status {
+                case .searching: self?.presence = .searching
+                case .connected: self?.presence = .online
+                case .disconnected: self?.presence = .disconnected
+                }
+            }
+        }
+    }
+
+    // MARK: Persistence
+
+    private func save() {
+        let entries: [ConversationArchive.Entry] = messages.map { message in
+            if let record = records[message.id] { return .mine(record) }
+            return .peer(WireMessage(id: message.id, text: message.text, sentAt: message.createdAt))
+        }
+        ConversationArchive(entries: entries, repliesUsed: repliesUsed).save(id: id)
+    }
+
+    /// Rebuilds the conversation from its archive. Sheets didn't survive the
+    /// relaunch, so each record goes through `.relaunched`; messages that were
+    /// still being scored are scored again.
+    private func restore(_ archive: ConversationArchive) {
+        for entry in archive.entries {
+            switch entry {
+            case .peer(let wire):
+                messages.append(Message(id: wire.id, user: peer, createdAt: wire.sentAt, text: wire.text))
+            case .mine(let saved):
+                let record = reduce(saved, .relaunched, now: app.now, policy: app.policy)
+                guard record.state != .dissolved else { continue }
+                records[record.id] = record
+                messages.append(Self.display(record))
+                if record.state == .scoring {
+                    score(record.text) { [weak self] score in self?.send(record.id, .scored(score)) }
+                }
+            }
+        }
+        save()
     }
 
     private func score(_ text: String, then: @escaping (Double) -> Void) {

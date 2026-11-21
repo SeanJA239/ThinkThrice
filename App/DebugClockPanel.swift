@@ -1,12 +1,14 @@
 import CalmCore
 import SwiftUI
 
-/// Hidden demo panel (triple-tap the chat title): move the demo clock, tune the
-/// thresholds on site and try sentences against the live scorer.
+/// Hidden demo panel (triple-tap the chat header): move the demo clock, tune the
+/// thresholds on site, try sentences against the live scorer, switch the
+/// two-phone conversation on or off, and wipe everything for a rehearsal.
 struct DebugClockPanel: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @State private var probe = ""
+    @State private var confirmReset = false
 
     var body: some View {
         @Bindable var app = app
@@ -32,6 +34,36 @@ struct DebugClockPanel: View {
                     LabeledContent("白天 \(app.policy.dayThreshold.formatted(.number.precision(.fractionLength(2))))") {
                         Slider(value: $app.policy.dayThreshold, in: 0...1, step: 0.05)
                     }
+                }
+
+                Section {
+                    Picker("模式", selection: Binding(
+                        get: { app.p2pRole?.rawValue ?? "off" },
+                        set: { app.p2pRole = P2PTransport.Role(rawValue: $0) }
+                    )) {
+                        Text("关闭").tag("off")
+                        Text("等待连接").tag(P2PTransport.Role.host.rawValue)
+                        Text("加入").tag(P2PTransport.Role.join.rawValue)
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("双机直连")
+                } footer: {
+                    Text("两台手机都打开 App，一台选「等待连接」，另一台选「加入」，然后都进入列表里的「附近的 TA」。连不上就选「关闭」，回到预设对话演示。")
+                }
+
+                Section {
+                    Button("清空所有对话", role: .destructive) { confirmReset = true }
+                        .confirmationDialog("清空所有对话？", isPresented: $confirmReset, titleVisibility: .visible) {
+                            Button("清空并重新开始", role: .destructive) {
+                                app.resetAll()
+                                dismiss()
+                            }
+                        } message: {
+                            Text("删除所有消息和沉淀状态，演示时钟和阈值也恢复默认。")
+                        }
+                } header: {
+                    Text("彩排")
                 }
 
                 Section("打分器") {

@@ -27,6 +27,10 @@ public enum SettleEvent: Equatable, Sendable {
     /// 放下: always allowed while the message is held, with no extra step.
     case letGo
     case dissolveFinished
+    /// The app was relaunched and its sheets are gone: a message that was in a
+    /// ritual, confirm, rewrite or rescore goes back to settling (or ready), and
+    /// one that was dissolving is gone.
+    case relaunched
 }
 
 /// The settle state machine as a pure function. Events that do not apply to the
@@ -104,8 +108,11 @@ public func reduce(_ message: CalmMessage, _ event: SettleEvent, now: Date, poli
     case (.settling, .letGo), (.ready, .letGo), (.ritual, .letGo), (.confirming, .letGo), (.rewriting, .letGo):
         m.state = .dissolving
 
-    case (.dissolving, .dissolveFinished):
+    case (.dissolving, .dissolveFinished), (.dissolving, .relaunched):
         m.state = .dissolved
+
+    case (.settling, .relaunched), (.ritual, .relaunched), (.confirming, .relaunched), (.rewriting, .relaunched), (.rescoring, .relaunched):
+        m.state = held()
 
     default:
         break

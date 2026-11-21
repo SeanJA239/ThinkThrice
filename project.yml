@@ -24,6 +24,12 @@ targets:
     dependencies:
       - package: ExyteChat
       - package: CalmCore
+    info:
+      path: App/Info.plist
+      properties:
+        NSLocalNetworkUsageDescription: ThinkThrice 用本地网络和另一台手机直接收发消息。
+        NSBonjourServices:
+          - _calmchat._tcp
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.thinkthrice.app
