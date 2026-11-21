@@ -2,9 +2,11 @@ import ActivityKit
 import CalmCore
 import Foundation
 
-/// One Live Activity per conversation while it has held messages: a snowflake
-/// and the countdown to the soonest one in the Dynamic Island and on the Lock
-/// Screen. When the last countdown ends it turns into 「冷静好了」 with an alert,
+/// One Live Activity per conversation while it has short holds (day settles
+/// and the cooling pause, at most `maxHoldDuration`): a snowflake and the
+/// countdown to the soonest one in the Dynamic Island and on the Lock Screen.
+/// Night holds that last until morning only get the banner notification, so a
+/// countdown doesn't sit in the island all night. When the last countdown ends it turns into 「冷静好了」 with an alert,
 /// and it ends once nothing is held. Countdowns are in demo-clock time, so the
 /// activity gets the real equivalent (`settleUntil` minus the demo offset), the
 /// same as the notifications.
@@ -14,16 +16,24 @@ final class LiveActivities {
     private var activityIDs: [String: String] = [:]
     private var states: [String: HeldActivityAttributes.ContentState] = [:]
 
+    /// Longer holds get no Live Activity.
+    static let maxHoldDuration: TimeInterval = 60 * 60
+
     init() {
-        // Activities still running from before a relaunch are picked up again.
-        for activity in Activity<HeldActivityAttributes>.activities {
-            activityIDs[activity.attributes.conversationID] = activity.id
-            states[activity.attributes.conversationID] = activity.content.state
+        // Activities outlive the app when it is quit; end the old ones, and
+        // `sync` starts fresh ones for whatever is still held.
+        for old in Activity<HeldActivityAttributes>.activities {
+            let id = old.id
+            Task.detached { await activity(id)?.end(nil, dismissalPolicy: .immediate) }
         }
     }
 
     func sync(_ store: ChatStore, offset: TimeInterval) {
-        let held = store.records.values.filter { $0.state.isHeld && $0.state != .scoring && $0.state != .dissolving }
+        let held = store.records.values.filter { record in
+            guard record.state.isHeld, record.state != .scoring, record.state != .dissolving,
+                  let until = record.settleUntil else { return false }
+            return until.timeIntervalSince(record.createdAt) <= Self.maxHoldDuration
+        }
         guard !held.isEmpty else {
             if let id = activityIDs.removeValue(forKey: store.id) {
                 states[store.id] = nil
