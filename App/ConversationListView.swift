@@ -25,10 +25,14 @@ struct ConversationListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { showProfile = true } label: {
-                        InitialAvatar(name: profileName, size: 32)
+                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 40)
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("个人主页")
                 }
+                // The avatar is its own circle; the shared glass capsule around
+                // toolbar items made a second, misaligned outline.
+                .sharedBackgroundVisibility(.hidden)
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
         }
@@ -42,7 +46,7 @@ private struct ConversationRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            InitialAvatar(name: store.peer.name)
+            InitialAvatar(name: store.peer.name, image: InitialAvatar.image(for: store))
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
                     Text(store.displayName).font(.headline)

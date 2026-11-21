@@ -17,7 +17,7 @@ struct ProfileView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     VStack(spacing: 8) {
-                        InitialAvatar(name: profileName, size: 96)
+                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 96)
                             .padding(4)
                             .overlay(Circle().stroke(Theme.gradient, lineWidth: 3))
                         Text(profileName).font(.title.weight(.bold))

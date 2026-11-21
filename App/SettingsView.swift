@@ -17,7 +17,7 @@ struct SettingsView: View {
             Form {
                 Section {
                     HStack(spacing: 12) {
-                        InitialAvatar(name: profileName, size: 52)
+                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 52)
                         VStack(alignment: .leading) {
                             Text(profileName).font(.headline)
                             Text("ThinkThrice · 三思而后发").font(.subheadline).foregroundStyle(.secondary)

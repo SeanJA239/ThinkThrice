@@ -163,7 +163,7 @@ struct ChatHeader: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            InitialAvatar(name: store.peer.name, size: 32)
+            InitialAvatar(name: store.peer.name, image: InitialAvatar.image(for: store), size: 32)
                 .overlay(alignment: .bottomTrailing) {
                     Circle()
                         .fill(dotColor)

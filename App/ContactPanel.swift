@@ -34,7 +34,7 @@ struct ContactPanel: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                InitialAvatar(name: store.peer.name, size: 52)
+                InitialAvatar(name: store.peer.name, image: InitialAvatar.image(for: store), size: 52)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(store.displayName).font(.title3.weight(.semibold))
                     Text(store.note.isEmpty ? "沉淀中的消息 \(store.heldCount) 条" : store.peer.name)
@@ -73,10 +73,15 @@ struct ContactPanel: View {
                 if store.isCooling { store.endCooling() } else { store.startCooling() }
             } label: {
                 Label(store.isCooling ? "结束冷静" : "双方冷静 15 分钟", systemImage: "snowflake")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 12)
+                    .contentShape(.capsule)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.plain)
+            // Clear, untinted Liquid Glass.
+            .glassEffect(.clear.interactive(), in: .capsule)
 
             VStack(spacing: 0) {
                 row {
