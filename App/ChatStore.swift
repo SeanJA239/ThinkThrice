@@ -54,6 +54,29 @@ final class ChatStore: Identifiable {
         listen()
     }
 
+    /// A new time header starts when this much time passed since the previous message.
+    static let timeHeaderGap: TimeInterval = 10 * 60
+
+    /// The time a row stands for: when an outgoing message was delivered, or written while it is held.
+    func displayDate(of message: Message) -> Date {
+        guard let record = records[message.id] else { return message.createdAt }
+        return record.deliveredAt ?? record.createdAt
+    }
+
+    /// The date to show as a centered header above this row, or nil to show none.
+    func timeHeader(for id: String) -> Date? {
+        guard let index = messages.firstIndex(where: { $0.id == id }) else { return nil }
+        let date = displayDate(of: messages[index])
+        guard index > 0 else { return date }
+        let gap = abs(date.timeIntervalSince(displayDate(of: messages[index - 1])))
+        return gap > Self.timeHeaderGap ? date : nil
+    }
+
+    /// The newest delivered outgoing message, the only one that shows 「已送达」.
+    var lastDeliveredID: String? {
+        messages.last { records[$0.id]?.state == .delivered }?.id
+    }
+
     var lastMessagePreview: String {
         guard let last = messages.last else { return "" }
         if let record = records[last.id], record.state.isHeld { return "沉淀中…" }

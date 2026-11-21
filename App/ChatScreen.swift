@@ -19,6 +19,8 @@ struct ChatScreen: View {
         .showMessageMenuOnLongPress(false)
         .setAvailableInputs([.text])
         .showDateHeaders(false)
+        // Times are shown iMessage style, as headers between messages (see CalmMessageCell).
+        .showMessageTimeView(false)
         .overlay(alignment: .top) { banner }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

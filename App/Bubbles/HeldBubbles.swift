@@ -2,48 +2,103 @@ import CalmCore
 import ExyteChat
 import SwiftUI
 
-/// The row for every message. Outgoing messages (they all have a record) use our
-/// own bubbles; messages from the other side keep exyte's default bubble.
+/// The row for every message, iMessage style: a centered time header when the
+/// conversation resumes after a gap, the bubble, and for outgoing messages a
+/// status line under the bubble. Times are never drawn inside bubbles.
 ///
-/// Delivered outgoing messages don't use exyte's bubble either: it measures text
-/// with UIKit, which comes out narrower than SwiftUI's rendering of full-width
-/// punctuation, so near-one-line Chinese messages were cut off with 「…」.
+/// Outgoing messages (they all have a record) use our own bubbles; messages
+/// from the other side keep exyte's default bubble. Delivered outgoing messages
+/// don't use exyte's bubble either: it measures text with UIKit, which comes out
+/// narrower than SwiftUI's rendering of full-width punctuation, so near-one-line
+/// Chinese messages were cut off with 「…」.
 struct CalmMessageCell: View {
+    @Environment(AppModel.self) private var app
     let params: MessageBuilderParameters
     let store: ChatStore
 
     var body: some View {
-        if let record = store.records[params.message.id] {
-            Group {
-                switch record.state {
-                case .delivered:
-                    DeliveredBubble(record: record)
-                case .ready:
-                    ReadyBubble(record: record)
-                case .dissolving, .dissolved:
-                    DissolveBubble(record: record)
-                default:
-                    SettlingBubble(record: record)
-                }
+        let id = params.message.id
+        VStack(spacing: 0) {
+            if let date = store.timeHeader(for: id) {
+                Text(TimeHeader.text(for: date, now: app.now, calendar: app.policy.calendar))
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 12)
+                    .padding(.bottom, 6)
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 2)
-            .contentShape(.rect)
-            .onTapGesture { store.tap(record.id) }
-        } else {
-            params.defaultMessageView()
+            if let record = store.records[id] {
+                outgoing(record)
+            } else {
+                params.defaultMessageView()
+            }
         }
+    }
+
+    @ViewBuilder private func outgoing(_ record: CalmMessage) -> some View {
+        Group {
+            switch record.state {
+            case .delivered:
+                DeliveredBubble(record: record, showsStatus: store.lastDeliveredID == record.id)
+            case .ready:
+                ReadyBubble(record: record)
+            case .dissolving, .dissolved:
+                DissolveBubble(record: record)
+            default:
+                SettlingBubble(record: record)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 2)
+        .contentShape(.rect)
+        .onTapGesture { store.tap(record.id) }
+    }
+}
+
+/// The centered header text: 「9:00」 today, 「昨天 1:30」, otherwise 「11月20日 9:00」.
+enum TimeHeader {
+    static func text(for date: Date, now: Date, calendar: Calendar) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "H:mm"
+        let time = formatter.string(from: date)
+        if calendar.isDate(date, inSameDayAs: now) { return time }
+        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(date, inSameDayAs: yesterday) {
+            return "昨天 \(time)"
+        }
+        formatter.dateFormat = "M月d日 H:mm"
+        return formatter.string(from: date)
+    }
+}
+
+/// A small line under an outgoing bubble, like iMessage's 「已送达」.
+private struct StatusLine: View {
+    let text: String
+    var systemImage: String?
+    var style: AnyShapeStyle = AnyShapeStyle(.secondary)
+
+    var body: some View {
+        HStack(spacing: 3) {
+            if let systemImage { Image(systemName: systemImage) }
+            Text(text).contentTransition(.numericText())
+        }
+        .font(.caption2.weight(.medium))
+        .foregroundStyle(style)
+        .padding(.trailing, 6)
     }
 }
 
 /// A solid sent bubble. When a held message has just been delivered, it turns
-/// from translucent glass to solid inside the bubble.
+/// from glass to solid inside the bubble. Only the newest delivered message
+/// shows 「已送达」 under it.
 struct DeliveredBubble: View {
     @Environment(AppModel.self) private var app
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.chatTheme) private var theme
     let record: CalmMessage
+    let showsStatus: Bool
     @State private var solid = true
 
     var body: some View {
@@ -54,29 +109,24 @@ struct DeliveredBubble: View {
                 .foregroundStyle(solid ? AnyShapeStyle(theme.colors.messageMyText) : AnyShapeStyle(.primary.opacity(0.55)))
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: 3) {
-                Text(time)
-                Image(systemName: "checkmark")
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                .background {
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(theme.colors.messageMyBG)
+                        .opacity(solid ? 1 : 0)
+                }
+                .glassEffect(.regular.tint(.cyan.opacity(solid ? 0 : 0.2)), in: .rect(cornerRadius: 18))
+            if showsStatus {
+                StatusLine(text: "已送达")
+                    .transition(.opacity)
             }
-            .font(.caption2)
-            .foregroundStyle(solid ? AnyShapeStyle(theme.colors.messageMyTimeText) : AnyShapeStyle(.secondary))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 9)
-        .background {
-            RoundedRectangle(cornerRadius: 18)
-                .fill(theme.colors.messageMyBG)
-                .opacity(solid ? 1 : 0)
-        }
-        .glassEffect(.regular.tint(.indigo.opacity(solid ? 0 : 0.18)), in: .rect(cornerRadius: 18))
         .frame(maxWidth: 280, alignment: .trailing)
         .onAppear(perform: animateIfJustDelivered)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("已送达：\(record.text)，\(time)")
-    }
-
-    private var time: String {
-        (record.deliveredAt ?? record.createdAt).formatted(date: .omitted, time: .shortened)
+        .accessibilityLabel("我：\(record.text)")
+        .accessibilityValue(showsStatus ? "已送达" : "")
     }
 
     /// Only a message that was held and delivered moments ago animates, so rows
@@ -89,42 +139,58 @@ struct DeliveredBubble: View {
     }
 }
 
-private struct HeldText: View {
+/// A held message: the bubble it would have been, muted and frozen inside a
+/// thick Liquid Glass shell. The text can't be selected or copied.
+private struct FrozenShell: View {
+    @Environment(\.chatTheme) private var theme
     let text: String
+    var tint: Color = .cyan
 
     var body: some View {
         Text(text)
-            .foregroundStyle(.primary.opacity(0.55))
+            .font(.subheadline)
+            .foregroundStyle(.white.opacity(0.9))
             .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
             .textSelection(.disabled)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(theme.colors.messageMyBG.opacity(0.4), in: .rect(cornerRadius: 18))
+            .saturation(0.6)
+            .padding(7)
+            .glassEffect(.clear.tint(tint.opacity(0.22)).interactive(), in: .rect(cornerRadius: 25))
+            .overlay {
+                // A bright rim on top and a faint one below make the shell read as thick glass.
+                RoundedRectangle(cornerRadius: 25)
+                    .strokeBorder(
+                        LinearGradient(colors: [.white.opacity(0.9), .white.opacity(0.15), tint.opacity(0.35)], startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1.2
+                    )
+            }
+            .shadow(color: tint.opacity(0.28), radius: 14, y: 6)
     }
 }
 
-/// Translucent glass bubble with a countdown. The content never leaves the device.
+/// Frozen while it settles; the countdown sits under the shell.
 struct SettlingBubble: View {
     @Environment(AppModel.self) private var app
     let record: CalmMessage
 
     var body: some View {
         let _ = app.clockRevision
-        VStack(alignment: .trailing, spacing: 6) {
-            HeldText(text: record.text)
+        VStack(alignment: .trailing, spacing: 5) {
+            FrozenShell(text: record.text)
             if record.state != .scoring {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    Label(countdown, systemImage: "hourglass")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .contentTransition(.numericText())
+                    StatusLine(text: countdown, systemImage: "snowflake")
                 }
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .glassEffect(.regular.tint(.indigo.opacity(0.18)), in: .rect(cornerRadius: 18))
-        .frame(maxWidth: 280, alignment: .trailing)
-        .accessibilityElement(children: .combine)
+        .frame(maxWidth: 290, alignment: .trailing)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("沉淀中的消息：\(record.text)。\(countdown)")
         .accessibilityHint("轻点选择怎么处理")
+        .accessibilityAddTraits(.isButton)
     }
 
     private var countdown: String {
@@ -145,22 +211,19 @@ struct ReadyBubble: View {
     let record: CalmMessage
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 6) {
-            HeldText(text: record.text)
-            Label("沉淀好了 · 轻点确认", systemImage: "checkmark.seal")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.tint)
+        VStack(alignment: .trailing, spacing: 5) {
+            FrozenShell(text: record.text, tint: .accentColor)
+            StatusLine(text: "沉淀好了 · 轻点确认", systemImage: "checkmark.seal", style: AnyShapeStyle(.tint))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .glassEffect(.regular.tint(.accentColor.opacity(0.25)).interactive(), in: .rect(cornerRadius: 18))
-        .frame(maxWidth: 280, alignment: .trailing)
-        .accessibilityElement(children: .combine)
+        .frame(maxWidth: 290, alignment: .trailing)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("沉淀好了的消息：\(record.text)")
         .accessibilityHint("轻点确认是否发送")
+        .accessibilityAddTraits(.isButton)
     }
 }
 
-/// Letting go: the bubble slowly blurs and fades away.
+/// Letting go: the frozen bubble slowly blurs and fades away.
 struct DissolveBubble: View {
     static let duration: Duration = .seconds(1.6)
 
@@ -169,11 +232,8 @@ struct DissolveBubble: View {
     @State private var gone = false
 
     var body: some View {
-        HeldText(text: record.text)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .glassEffect(.regular.tint(.gray.opacity(0.15)), in: .rect(cornerRadius: 18))
-            .frame(maxWidth: 280, alignment: .trailing)
+        FrozenShell(text: record.text, tint: .gray)
+            .frame(maxWidth: 290, alignment: .trailing)
             .blur(radius: gone && !reduceMotion ? 14 : 0)
             .scaleEffect(gone && !reduceMotion ? 0.92 : 1, anchor: .trailing)
             .opacity(gone ? 0 : 1)

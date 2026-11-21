@@ -5,15 +5,17 @@ import SwiftUI
 /// thresholds on site and try sentences against the live scorer.
 struct DebugClockPanel: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.dismiss) private var dismiss
     @State private var probe = ""
 
     var body: some View {
         @Bindable var app = app
+        // Read so the whole panel (for example 时段) refreshes when the demo clock moves.
+        let _ = app.clockRevision
         NavigationStack {
             Form {
                 Section("演示时钟") {
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
-                        let _ = app.clockRevision
                         LabeledContent("现在", value: app.now.formatted(date: .abbreviated, time: .standard))
                     }
                     LabeledContent("时段", value: app.policy.isNight(app.now) ? "夜间" : "白天")
@@ -44,6 +46,11 @@ struct DebugClockPanel: View {
             }
             .navigationTitle("演示面板")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
         }
         .presentationDetents([.medium, .large])
     }
