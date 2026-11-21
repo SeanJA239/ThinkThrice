@@ -15,7 +15,7 @@ Everything in the plan up to M2 works, plus most of M3. It was built and run on 
 | M3 local notification | Written, not checked on a device |
 | M3 SwiftData persistence | Not started (first in the cut list) |
 | M3 Core ML scorer with model v1 | Code and contract test done; waiting for Ryan's model |
-| M4 Liquid Glass polish, animations, accessibility | Partly: glass contact header, frozen Liquid Glass shell around held messages, iMessage-style time headers and 「已送达」, input bar, bubbles and sheets, in-bubble glass-to-solid transition on delivery, VoiceOver labels on held bubbles, Reduce Motion on dissolve |
+| M4 Liquid Glass polish, animations, accessibility | Partly: glass contact header, frozen Liquid Glass shell around held messages, iMessage-style 「已送达 9:00」 status line, input bar, bubbles and sheets, in-bubble glass-to-solid transition on delivery, VoiceOver labels on held bubbles, Reduce Motion on dissolve |
 | Two-device demo (optional, after M3) | Only the transport protocol exists; see "Two devices" |
 
 How it was checked:
@@ -51,7 +51,7 @@ ThinkThrice/
    └─ Model/                   drop the model here (see below)
 ```
 
-How a message moves: exyte calls `didSendMessage` → `ChatStore.submit` adds a `CalmMessage` in `.scoring` → the scorer runs off the main actor → `reduce(.scored)` → delivered (sent through `MessageTransport`, which triggers the scripted reply) or settling (notification scheduled). exyte's `Message` is display-only; `messageBuilder` looks up `records[message.id]`: every outgoing message has a record and is drawn with our own bubbles (solid `DeliveredBubble` in exyte's theme colours once delivered; while held, the muted bubble sits frozen inside a thick `.clear` Liquid Glass shell with a bright rim, and the countdown sits under it); messages from the other side use exyte's default bubble. Times are never drawn inside bubbles: as in iMessage, a centered header (「9:00」, 「昨天 1:30」) starts each run of messages more than 10 minutes after the previous one (`ChatStore.timeHeader(for:)`), and only the newest delivered message shows 「已送达」 under it. A held message's header uses the time it was written; once delivered it uses the delivery time. Every state change bumps `Message.triggerRedraw` so the table row redraws.
+How a message moves: exyte calls `didSendMessage` → `ChatStore.submit` adds a `CalmMessage` in `.scoring` → the scorer runs off the main actor → `reduce(.scored)` → delivered (sent through `MessageTransport`, which triggers the scripted reply) or settling (notification scheduled). exyte's `Message` is display-only; `messageBuilder` looks up `records[message.id]`: every outgoing message has a record and is drawn with our own bubbles (solid `DeliveredBubble` in exyte's theme colours once delivered; while held, the muted bubble sits frozen inside a thick `.clear` Liquid Glass shell with a bright rim, and the countdown sits under it); messages from the other side use exyte's default bubble. Times are never drawn inside bubbles: as in iMessage's 「Read 12:54 AM」, only the newest delivered message shows 「**已送达** 9:00」 (delivery time) under it (`ChatStore.lastDeliveredID`), and held messages show their countdown in the same place. Every state change bumps `Message.triggerRedraw` so the table row redraws.
 
 State machine as implemented (`SettleState`): `scoring → delivered | settling`; `settling → ready` on tick once `settleUntil` passes; `settling/ready → ritual(step, total) → delivered` (or back on 「算了」); `ready → confirming → delivered` (or back to `ready`); `settling/ready → rewriting(revealed) → rescoring → delivered | settling/ready`; any held state `→ dissolving → dissolved`. `settleUntil` is set once and never reset, so ritual, confirm and rewrite branches all return to the same countdown. Events that don't apply leave the message unchanged.
 
@@ -93,7 +93,7 @@ Not MultipeerConnectivity (deprecated; TN3151, TN3213). The plan is Network.fram
 ## Known issues
 
 - Fixed: delivered Chinese messages near one line long used to be cut off with 「…」 in exyte's default bubble (exyte measures text with UIKit, which comes out narrower than SwiftUI's rendering of full-width punctuation, and then applies `lineLimit(1)`). Outgoing messages now use our own `DeliveredBubble`.
-- A message delivered after settling stays where it was written, its time header switches to the delivery time, and it turns from glass to solid in place (skipped with Reduce Motion); the scripted reply appears below it.
+- A message delivered after settling stays where it was written, it turns from glass to solid in place (skipped with Reduce Motion); the scripted reply appears below it.
 - Threshold slider changes and all chat state are lost when the app is killed (no persistence yet; SwiftData is first in the cut list).
 - Local notifications use a time-interval trigger computed from the demo clock offset (real fire time = `settleUntil` − offset). Moving the clock reschedules them. Check on a device that the 「昨晚 1:47 的那条沉淀好了」 banner appears, including in the foreground.
 - Questions and scripted replies are draft copy for the non-tech teammates to replace in `App/Resources/*.json`. When a script runs out, the other side goes quiet.

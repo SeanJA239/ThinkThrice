@@ -2,9 +2,9 @@ import CalmCore
 import ExyteChat
 import SwiftUI
 
-/// The row for every message, iMessage style: a centered time header when the
-/// conversation resumes after a gap, the bubble, and for outgoing messages a
-/// status line under the bubble. Times are never drawn inside bubbles.
+/// The row for every message. Times are never drawn inside bubbles: as in
+/// iMessage, the newest delivered message gets 「已送达 9:00」 under it, and held
+/// messages show their countdown there instead.
 ///
 /// Outgoing messages (they all have a record) use our own bubbles; messages
 /// from the other side keep exyte's default bubble. Delivered outgoing messages
@@ -12,26 +12,14 @@ import SwiftUI
 /// narrower than SwiftUI's rendering of full-width punctuation, so near-one-line
 /// Chinese messages were cut off with 「…」.
 struct CalmMessageCell: View {
-    @Environment(AppModel.self) private var app
     let params: MessageBuilderParameters
     let store: ChatStore
 
     var body: some View {
-        let id = params.message.id
-        VStack(spacing: 0) {
-            if let date = store.timeHeader(for: id) {
-                Text(TimeHeader.text(for: date, now: app.now, calendar: app.policy.calendar))
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 12)
-                    .padding(.bottom, 6)
-            }
-            if let record = store.records[id] {
-                outgoing(record)
-            } else {
-                params.defaultMessageView()
-            }
+        if let record = store.records[params.message.id] {
+            outgoing(record)
+        } else {
+            params.defaultMessageView()
         }
     }
 
@@ -56,25 +44,10 @@ struct CalmMessageCell: View {
     }
 }
 
-/// The centered header text: 「9:00」 today, 「昨天 1:30」, otherwise 「11月20日 9:00」.
-enum TimeHeader {
-    static func text(for date: Date, now: Date, calendar: Calendar) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = calendar
-        formatter.timeZone = calendar.timeZone
-        formatter.dateFormat = "H:mm"
-        let time = formatter.string(from: date)
-        if calendar.isDate(date, inSameDayAs: now) { return time }
-        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(date, inSameDayAs: yesterday) {
-            return "昨天 \(time)"
-        }
-        formatter.dateFormat = "M月d日 H:mm"
-        return formatter.string(from: date)
-    }
-}
-
-/// A small line under an outgoing bubble, like iMessage's 「已送达」.
+/// A small line under an outgoing bubble, like iMessage's 「Read 12:54 AM」: an
+/// optional bold word, then the text.
 private struct StatusLine: View {
+    var emphasis: String?
     let text: String
     var systemImage: String?
     var style: AnyShapeStyle = AnyShapeStyle(.secondary)
@@ -82,6 +55,7 @@ private struct StatusLine: View {
     var body: some View {
         HStack(spacing: 3) {
             if let systemImage { Image(systemName: systemImage) }
+            if let emphasis { Text(emphasis).fontWeight(.semibold) }
             Text(text).contentTransition(.numericText())
         }
         .font(.caption2.weight(.medium))
@@ -92,7 +66,7 @@ private struct StatusLine: View {
 
 /// A solid sent bubble. When a held message has just been delivered, it turns
 /// from glass to solid inside the bubble. Only the newest delivered message
-/// shows 「已送达」 under it.
+/// shows 「已送达」 and its delivery time under it.
 struct DeliveredBubble: View {
     @Environment(AppModel.self) private var app
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -118,7 +92,7 @@ struct DeliveredBubble: View {
                 }
                 .glassEffect(.regular.tint(.cyan.opacity(solid ? 0 : 0.2)), in: .rect(cornerRadius: 18))
             if showsStatus {
-                StatusLine(text: "已送达")
+                StatusLine(emphasis: "已送达", text: time)
                     .transition(.opacity)
             }
         }
@@ -126,7 +100,11 @@ struct DeliveredBubble: View {
         .onAppear(perform: animateIfJustDelivered)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("我：\(record.text)")
-        .accessibilityValue(showsStatus ? "已送达" : "")
+        .accessibilityValue(showsStatus ? "已送达 \(time)" : "")
+    }
+
+    private var time: String {
+        (record.deliveredAt ?? record.createdAt).formatted(date: .omitted, time: .shortened)
     }
 
     /// Only a message that was held and delivered moments ago animates, so rows
