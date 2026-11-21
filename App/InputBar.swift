@@ -5,6 +5,7 @@ import SwiftUI
 /// field and calls the `didSendMessage` closure where the message is scored.
 struct InputBar: View {
     let params: InputViewBuilderParameters
+    var placeholder = "写点什么…"
 
     private var isEmpty: Bool {
         params.text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -13,7 +14,7 @@ struct InputBar: View {
     var body: some View {
         GlassEffectContainer {
             HStack(alignment: .bottom, spacing: 8) {
-                TextField("写点什么…", text: params.text, axis: .vertical)
+                TextField(placeholder, text: params.text, axis: .vertical)
                     .lineLimit(1...5)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)

@@ -42,6 +42,44 @@ final class ChatStore: Identifiable {
     enum Presence { case online, searching, disconnected }
     private(set) var presence: Presence = .online
 
+    /// What this side shows the other: chosen in the contact sheet. 冷静 is also
+    /// set automatically during a cooling pause.
+    enum MyStatus: String, Codable, CaseIterable, Identifiable {
+        case auto, calm, busy, offline
+        var id: String { rawValue }
+        var label: String {
+            switch self {
+            case .auto: "在线"
+            case .calm: "冷静中"
+            case .busy: "忙碌"
+            case .offline: "显示离线"
+            }
+        }
+        var symbol: String {
+            switch self {
+            case .auto: "circle.fill"
+            case .calm: "snowflake"
+            case .busy: "minus.circle.fill"
+            case .offline: "moon.fill"
+            }
+        }
+    }
+    var myStatus: MyStatus = .auto { didSet { save() } }
+    var note = "" { didSet { save() } }
+    var muted = false { didSet { save() } }
+    var pinned = false { didSet { save() } }
+
+    /// The name shown everywhere: the note if one is set.
+    var displayName: String { note.isEmpty ? peer.name : note }
+
+    /// The cooling pause: until then, my new messages are held and the other
+    /// side's replies wait, so both sides stop for a while.
+    static let coolingDuration: TimeInterval = 15 * 60
+    private(set) var coolUntil: Date?
+    private var heldIncoming: [WireMessage] = []
+
+    var isCooling: Bool { coolUntil.map { app.now < $0 } ?? false }
+
     private unowned let app: AppModel
     private let transport: any MessageTransport
     /// How many scripted replies have arrived, saved so a relaunch continues the script.
@@ -66,6 +104,12 @@ final class ChatStore: Identifiable {
             transport = ScriptedTransport(replies: Array(conversation.replies.dropFirst(repliesUsed)), clock: app.clock)
         }
         if let archive {
+            coolUntil = archive.coolUntil
+            heldIncoming = archive.heldIncoming ?? []
+            myStatus = archive.myStatus ?? .auto
+            note = archive.note ?? ""
+            muted = archive.muted ?? false
+            pinned = archive.pinned ?? false
             restore(archive)
         } else {
             let start = app.now.addingTimeInterval(-Double(conversation.seed.count) * 60)
@@ -130,6 +174,10 @@ final class ChatStore: Identifiable {
         records[record.id] = record
         messages.append(Self.display(record))
         save()
+        if isCooling, let coolUntil {
+            send(record.id, .hold(until: coolUntil))
+            return
+        }
         score(record.text) { [weak self] score in
             self?.send(record.id, .scored(score))
         }
@@ -163,6 +211,35 @@ final class ChatStore: Identifiable {
         for (id, record) in records where record.state == .settling {
             send(id, .tick)
         }
+        if coolUntil != nil, !isCooling { endCooling() }
+    }
+
+    // MARK: Cooling
+
+    func startCooling() {
+        let until = app.now.addingTimeInterval(Self.coolingDuration)
+        coolUntil = until
+        myStatus = .calm
+        app.stats.record(.cooled, at: app.now)
+        Haptics.freeze()
+        showBanner("双方冷静 15 分钟，\(until.formatted(date: .omitted, time: .shortened)) 再继续")
+        save()
+    }
+
+    /// Ends the pause, early or on time: held replies arrive, and messages I
+    /// wrote meanwhile are ready to confirm.
+    func endCooling() {
+        coolUntil = nil
+        if myStatus == .calm { myStatus = .auto }
+        for wire in heldIncoming {
+            messages.append(Message(id: wire.id, user: peer, createdAt: wire.sentAt, text: wire.text))
+        }
+        heldIncoming = []
+        for (id, record) in records where record.state == .settling && record.lastScore == nil {
+            send(id, .tick)
+        }
+        showBanner("冷静结束")
+        save()
     }
 
     /// Tapping a held bubble.
@@ -188,6 +265,7 @@ final class ChatStore: Identifiable {
     // MARK: Effects
 
     private func runEffects(from old: CalmMessage, to new: CalmMessage) {
+        recordStats(from: old, to: new)
         switch new.state {
         case .delivered:
             app.notifications.cancel(id: new.id)
@@ -222,6 +300,23 @@ final class ChatStore: Identifiable {
         }
     }
 
+    /// Feeds the 「三思」 page. A message held by a cooling pause (no score) is not
+    /// counted as impulsive.
+    private func recordStats(from old: CalmMessage, to new: CalmMessage) {
+        let kind: ThinkEvent.Kind?
+        switch (old.state, new.state) {
+        case (.scoring, .delivered): kind = .sentDirectly
+        case (.ritual, .delivered): kind = .ritualSent
+        case (.confirming, .delivered): kind = .waitedSent
+        case (.rescoring, .delivered): kind = .rewroteCalm
+        case (.scoring, .settling), (.scoring, .ready): kind = new.lastScore == nil ? nil : .held
+        case (.rescoring, .settling), (.rescoring, .ready): kind = .rewroteStill
+        case (_, .dissolving): kind = .letGo
+        default: kind = nil
+        }
+        if let kind { app.stats.record(kind, at: app.now) }
+    }
+
     private static func display(_ record: CalmMessage) -> Message {
         Message(
             id: record.id,
@@ -245,7 +340,11 @@ final class ChatStore: Identifiable {
         Task { [weak self] in
             for await wire in incoming {
                 guard let self else { return }
-                self.messages.append(Message(id: wire.id, user: self.peer, createdAt: wire.sentAt, text: wire.text))
+                if self.isCooling {
+                    self.heldIncoming.append(wire)
+                } else {
+                    self.messages.append(Message(id: wire.id, user: self.peer, createdAt: wire.sentAt, text: wire.text))
+                }
                 self.repliesUsed += 1
                 self.save()
             }
@@ -272,7 +371,10 @@ final class ChatStore: Identifiable {
             if let record = records[message.id] { return .mine(record) }
             return .peer(WireMessage(id: message.id, text: message.text, sentAt: message.createdAt))
         }
-        ConversationArchive(entries: entries, repliesUsed: repliesUsed).save(id: id)
+        ConversationArchive(
+            entries: entries, repliesUsed: repliesUsed, coolUntil: coolUntil, heldIncoming: heldIncoming,
+            myStatus: myStatus, note: note, muted: muted, pinned: pinned
+        ).save(id: id)
     }
 
     /// Rebuilds the conversation from its archive. Sheets didn't survive the
@@ -296,13 +398,25 @@ final class ChatStore: Identifiable {
         save()
     }
 
+    /// Judges `text` for this conversation's recipient, as late night when the
+    /// demo clock says night, and hands back the verdict's 0…1 impulse.
     private func score(_ text: String, then: @escaping (Double) -> Void) {
-        let scorer = app.scorer
+        let judge = app.judge
+        let recipient = conversation.recipient
+        let lateNight = app.policy.isNight(app.now)
         Task {
             // Off the main actor: a Core ML prediction takes tens of milliseconds.
-            let score = await Task.detached { scorer.score(text) }.value
-            then(score)
+            let verdict = await Task.detached { judge.judge(text, to: recipient, lateNight: lateNight) }.value
+            then(verdict.impulse)
         }
+    }
+
+    /// Why a held message was held, from the rules alone (no model call): the
+    /// matched words and their list, as they were at the time it was written.
+    func holdReason(for record: CalmMessage) -> Verdict {
+        ThinkThriceRules.judgeMessage(record.text, modelProb: 0, to: conversation.recipient,
+                                      lateNight: app.policy.isNight(record.createdAt),
+                                      contextFactor: conversation.recipient.contextFactor)
     }
 
     private func showBanner(_ text: String) {

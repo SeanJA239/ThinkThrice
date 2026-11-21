@@ -1,0 +1,62 @@
+text,kind,to,ctx,expect,note
+# 骂老板：连着发的常见说法
+每天让我们加班 你脑子是不是有问题？,msg,boss,1.6,lock,用户示例1
+你简直是个畜生啊 我不干了,msg,boss,1.6,lock,用户示例2
+天天加班还不给加班费，你还是人吗？,msg,boss,1.6,lock,常见
+周末还让我改方案，你是不是有病,msg,boss,1.6,lock,常见
+凌晨还在群里艾特我，你有完没完！,msg,boss,1.6,lock,常见
+你除了画饼还会干什么？,msg,boss,1.6,lock,常见
+又让我背锅，你要不要脸？,msg,boss,1.6,lock,常见
+你个傻逼老板，老子不伺候了,msg,boss,1.6,lock,常见
+天天PUA我们，你良心被狗吃了吧,msg,boss,1.6,lock,常见
+又让我通宵 你自己怎么不来干？,msg,boss,1.6,lock,常见
+你这种老板迟早倒闭,msg,boss,1.6,lock,常见
+我真是瞎了眼才来你这破公司,msg,boss,1.6,lock,常见
+开会就知道骂人，你算个什么玩意儿,msg,boss,1.6,lock,常见
+工资都发不出来还好意思画饼,msg,boss,1.6,lock,常见
+别再给我打电话了，烦不烦啊！,msg,boss,1.6,lock,常见
+凭什么功劳都是你的，锅都是我的？,msg,boss,1.6,lock,常见
+我不干了，你爱找谁找谁,msg,boss,1.6,lock,常见
+老子明天就不来了,msg,boss,1.6,lock,常见
+你就是个周扒皮,msg,boss,1.6,lock,常见
+说好的年终奖呢？骗子！,msg,boss,1.6,lock,常见
+你脑子进水了吧 这方案能行？,msg,boss,1.6,lock,常见
+你懂个屁,msg,boss,1.6,lock,常见
+扣我工资？你试试看！,msg,boss,1.6,lock,常见
+你是不是有毛病 十二点了还让我改,msg,boss,1.6,lock,常见
+我忍你很久了 这破班谁爱上谁上,msg,boss,1.6,lock,常见
+你这个领导当得真让人恶心,msg,boss,1.6,lock,常见
+这活我干不了了 你另请高明吧,msg,boss,1.6,lock,常见
+你脑子有坑吧,msg,boss,1.6,lock,常见
+加班加班加班 你是要我命吗,msg,boss,1.6,lock,常见
+有本事你开除我啊,msg,boss,1.6,lock,常见
+# 发给老板但平静：必须送达
+老板，明天的方案我早上九点前发您,msg,boss,1.6,send,平静
+收到，我马上改,msg,boss,1.6,send,平静
+好的老板 我今晚加个班把它弄完,msg,boss,1.6,send,平静
+王总，周报已经发您邮箱了,msg,boss,1.6,send,平静
+明天我请半天假去医院，可以吗？,msg,boss,1.6,send,平静
+这个需求我有点没想清楚，明天能找您聊十分钟吗？,msg,boss,1.6,send,平静
+谢谢老板，辛苦了,msg,boss,1.6,send,平静
+方案第三版改好了，您看看,msg,boss,1.6,send,平静
+这个deadline有点紧，能宽限两天吗？,msg,boss,1.6,send,平静
+明天的会几点开？,msg,boss,1.6,send,平静
+今天加班到很晚，好累啊,msg,boss,1.6,send,疲惫
+# 发给前任：复合/表白（靠规则）
+我还是很喜欢你,msg,ex,2.0,lock,表白
+其实我一直没放下你,msg,ex,2.0,lock,表白
+我们重新在一起好不好,msg,ex,2.0,lock,复合
+我错了 原谅我好吗,msg,ex,2.0,lock,复合
+我真的好想你,msg,ex,2.0,lock,复合
+能不能再给我一次机会,msg,ex,2.0,lock,复合
+你现在过得好吗,msg,ex,2.0,lock,试探
+# 第二批：新老板规则
+又让我加班 我真的受不了你了,msg,boss,1.6,lock,新规则
+天天画大饼 谁信啊,msg,boss,1.6,lock,新规则
+加班费呢？一分钱没见着,msg,boss,1.6,lock,新规则
+你行你上啊 别光会指挥,msg,boss,1.6,lock,新规则
+你是不是傻 这需求根本做不了,msg,boss,1.6,lock,新规则
+996还不给钱 你良心呢,msg,boss,1.6,lock,新规则
+这周末需要加班吗？,msg,boss,1.6,send,加班不是骂
+我想跟您申请调休一天,msg,boss,1.6,send,平静
+老板我发烧了 明天想请假,msg,boss,1.6,send,平静

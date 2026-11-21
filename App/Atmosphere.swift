@@ -1,52 +1,58 @@
 import SwiftUI
 
-/// The chat's backdrop follows the demo clock: a pale day sky, and at night a deep
-/// blue sky with twinkling stars, so jumping the clock to 1:30 is visible at a glance.
+/// The chat's backdrop follows the demo clock: a pale sky by day and a deep
+/// violet night sky at night. Snow falls only while a message in the chat is
+/// frozen, so the weather says whether anything is still settling.
 struct ChatAtmosphere: View {
     let night: Bool
+    let snowing: Bool
 
     var body: some View {
         ZStack {
             Color(.systemBackground)
-            LinearGradient(colors: [.blue.opacity(0.08), .clear], startPoint: .top, endPoint: .center)
+            LinearGradient(colors: [Theme.brand.opacity(0.08), .clear], startPoint: .top, endPoint: .center)
             ZStack {
                 LinearGradient(
-                    colors: [Color(red: 0.03, green: 0.05, blue: 0.16), Color(red: 0.10, green: 0.11, blue: 0.30)],
+                    colors: [Color(red: 0.05, green: 0.04, blue: 0.17), Color(red: 0.15, green: 0.11, blue: 0.36)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                RadialGradient(colors: [Color(red: 0.55, green: 0.65, blue: 1).opacity(0.22), .clear], center: .topTrailing, startRadius: 0, endRadius: 260)
-                StarField()
+                RadialGradient(colors: [Theme.brand.opacity(0.35), .clear], center: .topTrailing, startRadius: 0, endRadius: 280)
             }
             .opacity(night ? 1 : 0)
+            SnowFall(color: night ? .white : Theme.ice)
+                .opacity(snowing ? 1 : 0)
+                .animation(.easeInOut(duration: 1.5), value: snowing)
         }
         .accessibilityHidden(true)
     }
 }
 
-/// Stars at fixed pseudo-random spots in the top two thirds, each twinkling at its own pace.
-private struct StarField: View {
+/// Flakes that drift down and sway, each at its own speed, looping forever.
+private struct SnowFall: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private static let count = 70
+    let color: Color
+    private static let count = 60
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 20, paused: reduceMotion)) { context in
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { context in
             let t = context.date.timeIntervalSinceReferenceDate
             Canvas { canvas, size in
                 for i in 0..<Self.count {
-                    let x = noise(i, 1) * size.width
-                    let y = noise(i, 2) * size.height * 0.68
-                    let radius = 0.6 + noise(i, 3) * 1.4
-                    let twinkle = reduceMotion ? 1 : 0.55 + 0.45 * sin(t * (0.6 + noise(i, 4) * 1.6) + noise(i, 5) * 6.28)
-                    let rect = CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2)
-                    canvas.fill(Path(ellipseIn: rect), with: .color(.white.opacity(0.85 * twinkle)))
+                    let speed = 18 + noise(i, 1) * 30
+                    let radius = 1 + noise(i, 2) * 2.4
+                    let fall = (noise(i, 3) * size.height + t * speed).truncatingRemainder(dividingBy: size.height + 20) - 10
+                    let sway = sin(t * (0.4 + noise(i, 4)) + noise(i, 5) * 6.28) * (6 + noise(i, 6) * 10)
+                    let x = noise(i, 7) * size.width + sway
+                    let rect = CGRect(x: x - radius, y: fall - radius, width: radius * 2, height: radius * 2)
+                    canvas.fill(Path(ellipseIn: rect), with: .color(color.opacity(0.35 + 0.5 * noise(i, 8))))
                 }
             }
         }
     }
 }
 
-/// A stable value in 0..<1 for (index, salt), so the stars and particles keep their places between frames.
+/// A stable value in 0..<1 for (index, salt), so particles keep their places between frames.
 nonisolated func noise(_ index: Int, _ salt: Int) -> Double {
     let x = sin(Double(index) * 12.9898 + Double(salt) * 78.233) * 43758.5453
     return x - x.rounded(.down)

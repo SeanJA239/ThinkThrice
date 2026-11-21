@@ -1,3 +1,4 @@
+import CalmCore
 import Foundation
 
 /// Copy that non-tech teammates edit: `Resources/Questions.json` and `Resources/Scripts.json`.
@@ -19,6 +20,8 @@ struct Content {
     struct Conversation: Decodable, Identifiable {
         let id: String
         let name: String
+        /// Who the other side is for the detector: `ex`, `boss` or `other`.
+        let recipient: Recipient
         /// Messages from the other side already in the chat when the app opens.
         let seed: [String]
         /// Replies, one per message the user gets delivered.

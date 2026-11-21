@@ -50,6 +50,9 @@ struct RitualSheet: View {
                 .buttonStyle(.glass)
             }
             .padding(28)
+            // Always dark, like the Watch's Breathe screen, so the petals glow.
+            .environment(\.colorScheme, .dark)
+            .presentationBackground(Color(red: 0.03, green: 0.03, blue: 0.08))
             .interactiveDismissDisabled()
             .task(id: step) {
                 unlocked = false
@@ -64,43 +67,45 @@ struct RitualSheet: View {
     }
 }
 
-/// One slow breath per page: the circle swells and shrinks while a ring fills
-/// over the page's wait. The button below unlocks when the ring closes.
+/// One slow breath per page, like the Apple Watch Breathe app: six translucent
+/// petals bloom outward and turn while breathing in, then fold back to a small
+/// bud while breathing out. 「下一题」 unlocks after the page's wait.
 private struct BreathingGuide: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let start: Date
     let wait: TimeInterval
     let unlocked: Bool
 
+    private static let petals = 6
+
     var body: some View {
-        TimelineView(.animation(paused: unlocked && reduceMotion)) { context in
+        TimelineView(.animation(paused: reduceMotion)) { context in
             let t = context.date.timeIntervalSince(start)
-            let progress = min(1, max(0, t / wait))
             // A full breath takes `wait` seconds: in for the first half, out for the second.
-            let phase = (t.truncatingRemainder(dividingBy: wait)) / wait
-            let breath = reduceMotion ? 0.5 : (1 - cos(phase * 2 * .pi)) / 2
-            ZStack {
-                Circle()
-                    .fill(RadialGradient(colors: [.cyan.opacity(0.55), .indigo.opacity(0.18)], center: .center, startRadius: 4, endRadius: 70))
-                    .frame(width: 120, height: 120)
-                    .scaleEffect(0.65 + 0.35 * breath)
-                    .blur(radius: 2)
-                Circle()
-                    .stroke(.secondary.opacity(0.2), lineWidth: 3)
-                    .frame(width: 140, height: 140)
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(.cyan, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 140, height: 140)
-                Text(unlocked ? "可以继续了" : (phase < 0.5 ? "吸气" : "呼气"))
+            let phase = t.truncatingRemainder(dividingBy: wait) / wait
+            let breath = reduceMotion ? 1 : (1 - cos(phase * 2 * .pi)) / 2
+            VStack(spacing: 18) {
+                ZStack {
+                    ForEach(0..<Self.petals, id: \.self) { i in
+                        Circle()
+                            .fill(LinearGradient(colors: [Color(red: 0.55, green: 0.95, blue: 0.85), Color(red: 0.25, green: 0.6, blue: 0.75)], startPoint: .top, endPoint: .bottom))
+                            .frame(width: 76, height: 76)
+                            .offset(y: -38 * breath)
+                            .rotationEffect(.degrees(Double(i) * 360 / Double(Self.petals)))
+                            .opacity(0.55)
+                            .blendMode(.plusLighter)
+                    }
+                }
+                .scaleEffect(0.45 + 0.55 * breath)
+                .rotationEffect(.degrees(60 * breath))
+                .frame(width: 170, height: 170)
+                Text(unlocked ? "可以继续了" : (phase < 0.5 ? "吸气…" : "呼气…"))
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.primary.opacity(0.8))
+                    .foregroundStyle(.white.opacity(0.85))
                     .contentTransition(.opacity)
             }
         }
-        .frame(height: 150)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(unlocked ? "可以继续了" : "跟着圆圈慢慢呼吸")
+        .accessibilityLabel(unlocked ? "可以继续了" : "跟着花瓣慢慢呼吸")
     }
 }

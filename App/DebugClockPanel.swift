@@ -8,6 +8,7 @@ struct DebugClockPanel: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @State private var probe = ""
+    @State private var probeRecipient = Recipient.ex
     @State private var confirmReset = false
 
     var body: some View {
@@ -27,11 +28,11 @@ struct DebugClockPanel: View {
                     Button("回到真实时间", role: .destructive) { app.resetClock() }
                 }
 
-                Section("阈值（分数 ≥ 阈值就沉淀）") {
-                    LabeledContent("夜间 \(app.policy.nightThreshold.formatted(.number.precision(.fractionLength(2))))") {
+                Section("锁定线（冲动指数 ≥ 锁定线就沉淀）") {
+                    LabeledContent("夜间 \(Int((app.policy.nightThreshold * 100).rounded()))") {
                         Slider(value: $app.policy.nightThreshold, in: 0...1, step: 0.05)
                     }
-                    LabeledContent("白天 \(app.policy.dayThreshold.formatted(.number.precision(.fractionLength(2))))") {
+                    LabeledContent("白天 \(Int((app.policy.dayThreshold * 100).rounded()))") {
                         Slider(value: $app.policy.dayThreshold, in: 0...1, step: 0.05)
                     }
                 }
@@ -66,18 +67,29 @@ struct DebugClockPanel: View {
                     Text("彩排")
                 }
 
-                Section("打分器") {
-                    LabeledContent("当前", value: app.scorerName)
+                Section {
+                    LabeledContent("模型", value: app.judge.modelName)
+                    LabeledContent("中文 BERT 资源", value: app.embeddingStatus)
+                    Picker("发给", selection: $probeRecipient) {
+                        Text("前任").tag(Recipient.ex)
+                        Text("老板").tag(Recipient.boss)
+                        Text("其他").tag(Recipient.other)
+                    }
+                    .pickerStyle(.segmented)
                     TextField("输入一句话试试", text: $probe, axis: .vertical)
                     if !probe.isEmpty {
-                        let score = app.scorer.score(probe)
-                        LabeledContent("分数", value: score.formatted(.number.precision(.fractionLength(3))))
-                        LabeledContent("现在会", value: app.policy.shouldSettle(score: score, at: app.now) ? "沉淀" : "直接送达")
-                        let matched = app.keywords.matches(in: probe)
-                        LabeledContent("命中规则", value: matched.isEmpty ? "无" : matched.map { rule in
-                            "\(rule.pattern) \(rule.weight.formatted(.number.precision(.fractionLength(2))))" + (rule.category.map { "（\($0)）" } ?? "")
-                        }.joined(separator: "、"))
+                        let night = app.policy.isNight(app.now)
+                        let verdict = app.judge.judge(probe, to: probeRecipient, lateNight: night)
+                        LabeledContent("模型概率", value: app.judge.modelProbability(probe).formatted(.number.precision(.fractionLength(2))))
+                        LabeledContent("冲动指数", value: "\(Int(verdict.score.rounded()))")
+                        LabeledContent("现在会", value: app.policy.shouldSettle(score: verdict.impulse, at: app.now) ? "沉淀" : "直接送达")
+                        LabeledContent("原因", value: verdict.reason.rawValue)
+                        LabeledContent("命中规则", value: verdict.matched.isEmpty ? "无" : verdict.matched.joined(separator: "、"))
                     }
+                } header: {
+                    Text("打分器")
+                } footer: {
+                    Text("按当前演示时钟判断是否深夜。规则在 CalmCore/Sources/CalmCore/ThinkThriceRules.swift。")
                 }
             }
             .navigationTitle("演示面板")

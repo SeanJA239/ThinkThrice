@@ -1,15 +1,18 @@
 import Foundation
 
-/// Every threshold and timing in the app. Tune values here on site; the final
-/// thresholds come from the model's evaluation report.
+/// Every threshold and timing in the app. Tune values here on site.
+///
+/// Both thresholds default to 0.6: the model side's detector locks at a score of
+/// 60/100, and it already treats night differently through its late-night word
+/// lists, so day and night share one line (see `Verdict.impulse`).
 public struct TimePolicy: Sendable, Equatable {
     /// Night starts at this hour (inclusive), local time.
     public var nightStartHour = 23
     /// Night ends at this hour (exclusive), local time.
     public var nightEndHour = 6
     /// A score at or above the threshold settles the message.
-    public var nightThreshold = 0.5
-    public var dayThreshold = 0.7
+    public var nightThreshold = 0.6
+    public var dayThreshold = 0.6
     /// Night messages settle until this hour of the next morning.
     public var morningReleaseHour = 9
     public var morningReleaseMinute = 0

@@ -101,7 +101,7 @@ struct MessageBubble: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .padding(isMe ? .trailing : .leading, BubbleShape.tailWidth)
-            .background(isMe ? Color.blue : Color(.systemGray5), in: BubbleShape(isMe: isMe, hasTail: hasTail))
+            .background(isMe ? Theme.brand : Color(.systemGray5), in: BubbleShape(isMe: isMe, hasTail: hasTail))
             .frame(maxWidth: 290, alignment: isMe ? .trailing : .leading)
     }
 }
@@ -149,7 +149,7 @@ struct DeliveredBubble: View {
                 .padding(.trailing, BubbleShape.tailWidth)
                 .background {
                     BubbleShape(isMe: true, hasTail: hasTail)
-                        .fill(Color.blue)
+                        .fill(Theme.brand)
                         .opacity(solid ? 1 : 0)
                 }
                 .glassEffect(.regular.tint(.cyan.opacity(solid ? 0 : 0.2)), in: BubbleShape(isMe: true, hasTail: hasTail))
@@ -197,7 +197,7 @@ private struct FrozenShell: View {
             .textSelection(.disabled)
             .padding(.horizontal, 14)
             .padding(.vertical, 7)
-            .background(Color.blue.opacity(frozen ? 0.4 : 1), in: .rect(cornerRadius: 18, style: .continuous))
+            .background(Theme.brand.opacity(frozen ? 0.4 : 1), in: .rect(cornerRadius: 18, style: .continuous))
             .overlay {
                 // Frost on the inner bubble: a cold glint from the top-left corner.
                 RoundedRectangle(cornerRadius: 18, style: .continuous)

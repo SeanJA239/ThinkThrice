@@ -4,6 +4,8 @@ import Foundation
 public enum SettleEvent: Equatable, Sendable {
     /// The scorer returned a score for a freshly sent message.
     case scored(Double)
+    /// Sent during a cooling pause: held until `until` without scoring.
+    case hold(until: Date)
     /// The clock moved; a settling message becomes ready once its countdown passes.
     case tick
     /// 当晚就要发: start the high-cost ritual.
@@ -49,6 +51,10 @@ public func reduce(_ message: CalmMessage, _ event: SettleEvent, now: Date, poli
     }
 
     switch (message.state, event) {
+    case (.scoring, .hold(let until)):
+        m.settleUntil = until
+        m.state = now >= until ? .ready : .settling
+
     case (.scoring, .scored(let score)):
         m.lastScore = score
         if policy.shouldSettle(score: score, at: now) {

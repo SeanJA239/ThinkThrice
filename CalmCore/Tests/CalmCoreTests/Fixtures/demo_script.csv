@@ -1,0 +1,19 @@
+text,kind,to,ctx,expect,note
+# 路演脚本：按顺序演示（必须全过）
+老板我今天需要请一个病假,msg,boss,1.6,send,脚本1：请病假必须送达
+你是不是脑子有问题？天天让人加班,msg,boss,1.6,lock,脚本2：怼老板必须锁
+在吗,msg,ex,2.0,send,脚本3：在吗必须送达
+我想复合了,msg,ex,2.0,lock,脚本4：想复合必须锁
+# 现场手滑/改口的变体
+老板，我今天需要请一个病假,msg,boss,1.6,send,变体
+老板我今天需要请一个病假。,msg,boss,1.6,send,变体
+老板 我今天身体不舒服 想请一天病假,msg,boss,1.6,send,变体
+你是不是脑子有问题？天天让人加班！,msg,boss,1.6,lock,变体
+你是不是脑子有问题 天天让人加班,msg,boss,1.6,lock,变体
+你脑子是不是有问题？天天让我们加班,msg,boss,1.6,lock,变体
+天天让人加班，你是不是脑子有问题？,msg,boss,1.6,lock,变体
+在吗？,msg,ex,2.0,send,变体
+在吗在吗,msg,ex,2.0,send,变体
+我想复合了。,msg,ex,2.0,lock,变体
+我想和你复合,msg,ex,2.0,lock,变体
+我们复合吧,msg,ex,2.0,lock,变体

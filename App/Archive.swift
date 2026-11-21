@@ -19,6 +19,14 @@ struct ConversationArchive: Codable {
     var entries: [Entry]
     /// How many scripted replies the other side has already sent.
     var repliesUsed: Int
+    /// A cooling pause in progress, and replies held back until it ends.
+    var coolUntil: Date?
+    var heldIncoming: [WireMessage]?
+    /// The contact sheet's settings. Optional so older files still decode.
+    var myStatus: ChatStore.MyStatus?
+    var note: String?
+    var muted: Bool?
+    var pinned: Bool?
 
     private static var directory: URL {
         URL.applicationSupportDirectory.appending(path: "Conversations", directoryHint: .isDirectory)

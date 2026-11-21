@@ -41,15 +41,24 @@ struct ActionPanel: View {
         .presentationDetents([.medium])
     }
 
-    /// Why this message was held: its score, and the keyword rules it matched.
+    /// Why this message was held: its impulse score, and the words that triggered it.
     private var reason: String? {
         guard let record = store.records[id], let score = record.lastScore else { return nil }
-        let value = score.formatted(.number.precision(.fractionLength(2)))
-        let matched = app.keywords.matches(in: record.text).prefix(3).map { rule in
-            rule.regex == true ? (rule.category ?? "句式") : "「\(rule.pattern)」"
+        let value = Int((score * 100).rounded())
+        let verdict = store.holdReason(for: record)
+        guard !verdict.matched.isEmpty else { return "冲动指数 \(value) · 语气激动" }
+        let words = verdict.matched.prefix(3).map { "「\($0)」" }.joined(separator: " ")
+        return "冲动指数 \(value) · \(Self.label(verdict.reason)) \(words)"
+    }
+
+    private static func label(_ reason: LockReason) -> String {
+        switch reason {
+        case .insult: "狠话"
+        case .bossRant: "怼老板"
+        case .reconcile: "深夜想复合"
+        case .quit: "深夜想辞职"
+        case .model, .none: "语气激动"
         }
-        if matched.isEmpty { return "冲动指数 \(value) · 模型判断" }
-        return "冲动指数 \(value) · 因为 \(matched.joined(separator: " "))"
     }
 
     private func exit(_ title: String, detail: String, icon: String, action: @escaping () -> Void) -> some View {

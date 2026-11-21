@@ -8,7 +8,14 @@ let shanghai: Calendar = {
     return calendar
 }()
 
-let policy = TimePolicy(calendar: shanghai)
+/// Explicit thresholds, so these tests check the mechanism (night stricter than
+/// day, inclusive boundaries) whatever the app's defaults are.
+let policy: TimePolicy = {
+    var policy = TimePolicy(calendar: shanghai)
+    policy.nightThreshold = 0.5
+    policy.dayThreshold = 0.7
+    return policy
+}()
 
 func at(_ day: Int, _ hour: Int, _ minute: Int = 0) -> Date {
     shanghai.date(from: DateComponents(year: 2026, month: 11, day: day, hour: hour, minute: minute))!

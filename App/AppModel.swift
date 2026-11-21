@@ -1,8 +1,9 @@
 import CalmCore
 import Foundation
+import NaturalLanguage
 import Observation
 
-/// App-wide services: the demo clock, the time policy, the scorer, the copy and the conversations.
+/// App-wide services: the demo clock, the time policy, the detector, the copy and the conversations.
 @Observable
 final class AppModel {
     /// The app always reads time from the demo clock; with no offset it is real time.
@@ -10,47 +11,47 @@ final class AppModel {
     var policy = TimePolicy() {
         didSet { DemoSettings.thresholds = (policy.nightThreshold, policy.dayThreshold) }
     }
-    let scorer: any Scorer
-    /// Shown in the debug panel so the team can tell which scorer is live.
-    let scorerName: String
+    /// The model side's detector: the Core ML model (ThinkThriceAnger, or the
+    /// Lite fallback) plus their keyword rules. Without a model the rules decide alone.
+    let judge: ThinkThriceJudge
     let content: Content
     let notifications = Notifications()
+    /// Whether the Chinese BERT embedding the main model runs on is on this device.
+    /// Workaround: on a fresh Mac the first test run got no prediction at all from
+    /// ThinkThriceAnger for some sentences (probability 0, so only the rules
+    /// decided) and every later run was fine, so the app asks for the assets at
+    /// launch and the demo panel shows this before going on stage.
+    private(set) var embeddingStatus = "检查中…"
+
+    private func prepareEmbeddingAssets() {
+        guard let embedding = NLContextualEmbedding(language: .simplifiedChinese) else {
+            embeddingStatus = "系统不支持"
+            return
+        }
+        guard !embedding.hasAvailableAssets else {
+            embeddingStatus = "已就绪"
+            return
+        }
+        embeddingStatus = "下载中…"
+        Task { [weak self] in
+            let result = try? await embedding.requestAssets()
+            self?.embeddingStatus = result == .available ? "已就绪" : "未就绪，模型可能只靠规则"
+        }
+    }
+
+    /// The 「三思」 progress log.
+    let stats: StatsStore
     private(set) var stores: [ChatStore] = []
     /// Bumped on every demo clock change so views that show the time refresh at once.
     private(set) var clockRevision = 0
 
-    /// Keyword rules from `Resources/Keywords.json`, kept separately so the demo
-    /// panel can show which rules a sentence matched.
-    let keywords: KeywordScorer
-
-    /// An invalid file stops the app at launch with the reason, like the other
-    /// bundled JSON; `swift test` in CalmCore checks the file too.
-    private static func loadKeywords() -> KeywordScorer {
-        guard let url = Bundle.main.url(forResource: "Keywords", withExtension: "json") else {
-            fatalError("Keywords.json is missing from the app bundle")
-        }
-        do {
-            return try KeywordScorer(json: Data(contentsOf: url))
-        } catch {
-            fatalError("Keywords.json is invalid: \(error)")
-        }
-    }
-
-    /// The file name the model side delivers: `App/Model/ImpulseClassifier.mlmodel`.
-    static let bundledModelName = "ImpulseClassifier"
-
     init() {
-        keywords = Self.loadKeywords()
-        // The model only tells anger from calm, so keyword rules always run next to
-        // it and the higher score wins.
-        if let model = CoreMLScorer(bundledModelNamed: Self.bundledModelName) {
-            scorer = MaxScorer([model, keywords])
-            scorerName = "Core ML + 关键词（\(keywords.rules.count) 条）"
-        } else {
-            scorer = MaxScorer([keywords, NLTaggerScorer()])
-            scorerName = "关键词（\(keywords.rules.count) 条，未找到模型）"
-        }
+        let classifier = ThinkThriceClassifier()
+        judge = ThinkThriceJudge(classifier: classifier)
+        // Warm up off the main thread so the first message isn't slow.
+        Task.detached { classifier?.warmUp() }
         content = Content.load()
+        stats = StatsStore(now: Date())
         if let thresholds = DemoSettings.thresholds {
             policy.nightThreshold = thresholds.night
             policy.dayThreshold = thresholds.day
@@ -61,10 +62,11 @@ final class AppModel {
         p2pRole = DemoSettings.p2pRole
         buildStores()
         startTicking()
+        prepareEmbeddingAssets()
     }
 
     /// The two-phone conversation, listed after the scripted ones while a role is set.
-    static let nearbyConversation = Content.Conversation(id: "nearby", name: "附近的 TA", seed: [], replies: [])
+    static let nearbyConversation = Content.Conversation(id: "nearby", name: "附近的 TA", recipient: .other, seed: [], replies: [])
 
     /// nil: scripted conversations only. Otherwise this phone hosts or joins a
     /// two-phone conversation. Switching back to nil is the on-site fallback.
@@ -89,6 +91,7 @@ final class AppModel {
     /// scripts over. The two-phone role is kept.
     func resetAll() {
         ConversationArchive.deleteAll()
+        stats.reset(now: now)
         DemoSettings.reset()
         notifications.cancelAll()
         clock.reset()

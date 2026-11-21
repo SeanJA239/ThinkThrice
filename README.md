@@ -8,8 +8,8 @@ Requires Xcode 26 or later and an iPhone on iOS 26 or later.
 
 1. Open `ThinkThrice.xcodeproj`, choose your team under Signing & Capabilities, and run the `ThinkThrice` scheme on the iPhone.
 2. Run the core tests with `cd CalmCore && swift test` on a Mac.
-3. In a chat, triple-tap the contact header to open the demo panel (demo clock, thresholds, scorer probe, two-phone mode, reset).
+3. In a chat, press and hold the contact header to open the demo panel (demo clock, lock lines, detector probe, two-phone mode, reset); tap it for the contact sheet.
 
-The trained model goes in `App/Model/ImpulseClassifier.mlmodel`. Until it's there, a keyword scorer stands in.
+Impulsive messages are detected on the phone by a Core ML model plus keyword rules (`App/Model/`, `CalmCore/Sources/CalmCore/ThinkThriceRules.swift`).
 
 See [docs/HANDOFF.md](docs/HANDOFF.md) for the current status, structure, the model contract and next steps.

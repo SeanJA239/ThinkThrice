@@ -2,17 +2,35 @@ import SwiftUI
 
 struct ConversationListView: View {
     @Environment(AppModel.self) private var app
+    @AppStorage("profileName") private var profileName = "我"
+    @State private var showProfile = false
+
+    /// Pinned conversations first, otherwise in their original order.
+    private var stores: [ChatStore] {
+        app.stores.enumerated()
+            .sorted { ($0.element.pinned ? 0 : 1, $0.offset) < ($1.element.pinned ? 0 : 1, $1.offset) }
+            .map(\.element)
+    }
 
     var body: some View {
         NavigationStack {
-            List(app.stores) { store in
+            List(stores) { store in
                 NavigationLink {
                     ChatScreen(store: store)
                 } label: {
                     ConversationRow(store: store)
                 }
             }
-            .navigationTitle("ThinkThrice")
+            .navigationTitle("聊天")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { showProfile = true } label: {
+                        InitialAvatar(name: profileName, size: 32)
+                    }
+                    .accessibilityLabel("个人主页")
+                }
+            }
+            .sheet(isPresented: $showProfile) { ProfileView() }
         }
         .task { await app.notifications.requestPermission() }
     }
@@ -24,14 +42,18 @@ private struct ConversationRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(String(store.peer.name.prefix(1)))
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(width: 46, height: 46)
-                .background(.indigo.gradient, in: .circle)
+            InitialAvatar(name: store.peer.name)
             VStack(alignment: .leading, spacing: 3) {
-                Text(store.peer.name).font(.headline)
-                Text(store.lastMessagePreview)
+                HStack(spacing: 4) {
+                    Text(store.displayName).font(.headline)
+                    if store.muted {
+                        Image(systemName: "bell.slash.fill").font(.caption).foregroundStyle(.secondary)
+                    }
+                    if store.pinned {
+                        Image(systemName: "pin.fill").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Text(store.isCooling ? "双方冷静中…" : store.lastMessagePreview)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -49,7 +71,7 @@ private struct ConversationRow: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 2)
-                        .background(.cyan.gradient, in: .capsule)
+                        .background(Theme.ice.gradient, in: .capsule)
                         .accessibilityLabel("\(store.heldCount) 条沉淀中")
                 }
             }
