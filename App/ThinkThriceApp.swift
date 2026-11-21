@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct ThinkThriceApp: App {
     @State private var app = AppModel()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +20,9 @@ struct ThinkThriceApp: App {
             }
             .tint(Theme.brand)
             .environment(app)
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background { app.heldUnlocked = false }
+            }
         }
     }
 }

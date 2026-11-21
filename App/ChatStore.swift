@@ -255,6 +255,10 @@ final class ChatStore: Identifiable {
     /// Tapping a held bubble.
     func tap(_ id: String) {
         guard let record = records[id] else { return }
+        if app.hidesHeld, record.state == .settling || record.state == .ready {
+            Task { if await app.unlockHeld() { tap(id) } }
+            return
+        }
         switch record.state {
         case .settling:
             route = .actions(id)

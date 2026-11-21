@@ -28,6 +28,7 @@ targets:
       path: App/Info.plist
       properties:
         NSLocalNetworkUsageDescription: ThinkThrice 用本地网络和另一台手机直接收发消息。
+        NSFaceIDUsageDescription: ThinkThrice 用 Face ID 确认是你本人在查看冷静中的消息。
         NSBonjourServices:
           - _calmchat._tcp
     settings:

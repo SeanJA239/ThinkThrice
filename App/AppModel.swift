@@ -1,5 +1,6 @@
 import CalmCore
 import Foundation
+import LocalAuthentication
 import NaturalLanguage
 import Observation
 
@@ -39,6 +40,32 @@ final class AppModel {
         }
     }
 
+    /// 设置 → 查看冷静中的消息需要 Face ID. While on, held messages are blurred
+    /// until Face ID (or the passcode) unlocks them; the unlock lasts until the
+    /// app goes to the background.
+    var lockHeld: Bool {
+        didSet {
+            UserDefaults.standard.set(lockHeld, forKey: Self.lockHeldKey)
+            heldUnlocked = false
+        }
+    }
+    var heldUnlocked = false
+    var hidesHeld: Bool { lockHeld && !heldUnlocked }
+    private static let lockHeldKey = "lockHeld"
+
+    /// Asks for Face ID, falling back to the passcode. Returns whether held messages are now visible.
+    func unlockHeld() async -> Bool {
+        let context = LAContext()
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) else {
+            // Fallback: a phone with neither Face ID nor a passcode has nothing
+            // to unlock with, so the messages open rather than staying stuck.
+            heldUnlocked = true
+            return true
+        }
+        heldUnlocked = (try? await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "查看冷静中的消息")) ?? false
+        return heldUnlocked
+    }
+
     /// The 「三思」 progress log.
     let stats: StatsStore
     private(set) var stores: [ChatStore] = []
@@ -51,7 +78,9 @@ final class AppModel {
             ConversationArchive.deleteAll()
             DemoSettings.reset()
             DemoSettings.p2pRole = nil
+            UserDefaults.standard.removeObject(forKey: Self.lockHeldKey)
         }
+        lockHeld = UserDefaults.standard.bool(forKey: Self.lockHeldKey)
         let classifier = ThinkThriceClassifier()
         // The Lite model also stands in when the main one gives no prediction (see `ThinkThriceJudge.fallback`).
         let lite = classifier?.modelName == "ThinkThriceAngerLite" ? nil : Bundle.main

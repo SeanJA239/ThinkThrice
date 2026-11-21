@@ -183,13 +183,21 @@ struct DeliveredBubble: View {
 /// thick Liquid Glass shell. The text can't be selected or copied. With
 /// `frozen` false it is a plain blue bubble, so animating `frozen` to true plays
 /// the freeze: the colour drains, an icy glint appears and the shell closes around it.
+/// `hidden` blurs the text behind a Face ID glyph (设置 → Face ID).
 private struct FrozenShell: View {
     let text: String
     var tint: Color = .cyan
     var frozen = true
+    var hidden = false
 
     var body: some View {
         Text(text)
+            .blur(radius: hidden ? 7 : 0)
+            .overlay {
+                if hidden {
+                    Image(systemName: "faceid").font(.title3.weight(.semibold)).foregroundStyle(.white)
+                }
+            }
             .font(.body)
             .foregroundStyle(.white.opacity(frozen ? 0.9 : 1))
             .multilineTextAlignment(.leading)
@@ -282,7 +290,7 @@ struct SettlingBubble: View {
     var body: some View {
         let _ = app.clockRevision
         VStack(alignment: .trailing, spacing: 5) {
-            FrozenShell(text: record.text, frozen: frozen)
+            FrozenShell(text: record.text, frozen: frozen, hidden: app.hidesHeld)
                 .scaleEffect(pulse ? 1.05 : 1, anchor: .trailing)
                 .overlay {
                     if let burst { SnowBurst().id(burst) }
@@ -307,8 +315,8 @@ struct SettlingBubble: View {
             if record.state == .settling, app.now.timeIntervalSince(record.createdAt) < 1.2 { freeze() }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("冷静中的消息：\(record.text)。\(countdown)")
-        .accessibilityHint("轻点选择怎么处理")
+        .accessibilityLabel("冷静中的消息：\(app.hidesHeld ? "已隐藏" : record.text)。\(countdown)")
+        .accessibilityHint(app.hidesHeld ? "轻点用 Face ID 查看" : "轻点选择怎么处理")
         .accessibilityAddTraits(.isButton)
     }
 
@@ -349,17 +357,18 @@ struct SettlingBubble: View {
 
 /// The countdown has passed; tapping opens the light confirm.
 struct ReadyBubble: View {
+    @Environment(AppModel.self) private var app
     let record: CalmMessage
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
-            FrozenShell(text: record.text, tint: .accentColor)
+            FrozenShell(text: record.text, tint: .accentColor, hidden: app.hidesHeld)
             StatusLine(text: "冷静好了 · 轻点确认", systemImage: "checkmark.seal", style: AnyShapeStyle(.tint))
         }
         .frame(maxWidth: 290, alignment: .trailing)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("冷静好了的消息：\(record.text)")
-        .accessibilityHint("轻点确认是否发送")
+        .accessibilityLabel("冷静好了的消息：\(app.hidesHeld ? "已隐藏" : record.text)")
+        .accessibilityHint(app.hidesHeld ? "轻点用 Face ID 查看" : "轻点确认是否发送")
         .accessibilityAddTraits(.isButton)
     }
 }

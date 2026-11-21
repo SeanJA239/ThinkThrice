@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// Settings. The thresholds are live (the same values the demo panel tunes);
-/// the notification and privacy switches are saved but not wired up yet.
+/// Settings. The thresholds are live (the same values the demo panel tunes) and
+/// the Face ID switch locks held messages; the notification switches are saved
+/// but not wired up yet.
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @AppStorage("notifyWhenReady") private var notifyWhenReady = true
     @AppStorage("notifySound") private var notifySound = true
-    @AppStorage("lockHeld") private var lockHeld = false
     @AppStorage("profileName") private var profileName = "我"
     @State private var showDebug = false
     @State private var confirmReset = false
@@ -49,7 +49,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Toggle("查看冷静中的消息需要 Face ID", isOn: $lockHeld)
+                    Toggle("查看冷静中的消息需要 Face ID", isOn: $app.lockHeld)
                     Label("冻住的消息只存在这台手机上，送达前不会发给任何人。", systemImage: "lock.shield")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
