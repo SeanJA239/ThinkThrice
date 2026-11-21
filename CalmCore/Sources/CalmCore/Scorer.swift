@@ -37,33 +37,76 @@ public struct MaxScorer: Scorer {
     }
 }
 
-/// Fallback until the Create ML model is ready: a small lexicon of impulsive phrases.
+/// One keyword trigger. The app's rules live in `App/Resources/Keywords.json`,
+/// which the model side edits without touching Swift.
+public struct KeywordRule: Codable, Sendable, Equatable {
+    /// A plain substring, or an ICU regular expression when `regex` is true.
+    public var pattern: String
+    /// How impulsive a message containing it is, 0…1.
+    public var weight: Double
+    /// Optional label such as 攻击 or 挽回, shown with the matches in the demo panel.
+    public var category: String?
+    public var regex: Bool?
+
+    public init(pattern: String, weight: Double, category: String? = nil, regex: Bool? = nil) {
+        self.pattern = pattern
+        self.weight = weight
+        self.category = category
+        self.regex = regex
+    }
+
+    func matches(_ text: String) -> Bool {
+        if regex == true {
+            return text.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
+        }
+        return text.range(of: pattern, options: .caseInsensitive) != nil
+    }
+}
+
+/// Scores with keyword rules: every matching rule adds its weight with noisy-OR
+/// (1 − Π(1 − w)), so one strong rule settles a message and several weak ones add up.
 ///
-/// Workaround: the plan was to fall back to `NLTagger` sentiment, but on macOS 27
-/// `NLTagger` offers no `.sentimentScore` scheme for Simplified Chinese and tags
-/// every Chinese sentence `Other`. Each matched phrase adds its weight with
-/// noisy-OR (1 − Π(1 − w)), so one strong phrase settles a message and several
-/// weak ones add up. Sadness words are deliberately absent: 「我好难过」 must not be held.
+/// The plan's fallback was `NLTagger` sentiment, but on macOS 27 `NLTagger` has no
+/// `.sentimentScore` scheme for Simplified Chinese, and the trained model only
+/// separates anger from calm, so keyword rules carry the rest (late-night
+/// confessions, trying to win someone back, quitting in anger). Sadness must not
+/// trigger: 「我好难过」 is never held.
 public struct KeywordScorer: Scorer {
-    public static let defaultLexicon: [String: Double] = [
-        "去死": 0.95, "滚": 0.9, "混蛋": 0.85, "受够": 0.8, "骗子": 0.8, "有病": 0.8, "闭嘴": 0.8,
-        "恨你": 0.75, "恶心": 0.7, "不干了": 0.7, "分手": 0.7, "傻逼": 0.9, "垃圾": 0.6,
-        "凭什么": 0.6, "再也不": 0.6, "复合": 0.6, "你根本": 0.5, "每次都": 0.5, "过分": 0.5,
-        "别再": 0.5, "求你": 0.5, "想你": 0.45, "我们完了": 0.6, "辞职": 0.5, "脑子": 0.4,
-        "！！": 0.3, "!!": 0.3, "？？": 0.3, "??": 0.3,
-    ]
+    public var rules: [KeywordRule]
 
-    public var lexicon: [String: Double]
+    public init(rules: [KeywordRule]) {
+        self.rules = rules
+    }
 
-    public init(lexicon: [String: Double] = KeywordScorer.defaultLexicon) {
-        self.lexicon = lexicon
+    /// Decodes `{ "rules": [ { "pattern": …, "weight": …, "category": …, "regex": … } ] }`
+    /// and checks every regular expression compiles and every weight is within 0…1.
+    public init(json data: Data) throws {
+        struct File: Decodable { let rules: [KeywordRule] }
+        let rules = try JSONDecoder().decode(File.self, from: data).rules
+        for rule in rules {
+            guard (0...1).contains(rule.weight) else { throw InvalidRule(rule: rule, reason: "weight must be within 0…1") }
+            if rule.regex == true {
+                do { _ = try NSRegularExpression(pattern: rule.pattern) } catch {
+                    throw InvalidRule(rule: rule, reason: "regular expression does not compile")
+                }
+            }
+        }
+        self.rules = rules
+    }
+
+    public struct InvalidRule: Error, CustomStringConvertible {
+        public let rule: KeywordRule
+        public let reason: String
+        public var description: String { "Keyword rule \"\(rule.pattern)\": \(reason)" }
+    }
+
+    /// The rules that match `text`, for showing why a message was held.
+    public func matches(in text: String) -> [KeywordRule] {
+        rules.filter { $0.matches(text) }
     }
 
     public func score(_ text: String) -> Double {
-        let calm = lexicon.reduce(1.0) { product, entry in
-            text.contains(entry.key) ? product * (1 - min(1, max(0, entry.value))) : product
-        }
-        return 1 - calm
+        1 - matches(in: text).reduce(1.0) { $0 * (1 - $1.weight) }
     }
 }
 

@@ -73,6 +73,10 @@ struct DebugClockPanel: View {
                         let score = app.scorer.score(probe)
                         LabeledContent("分数", value: score.formatted(.number.precision(.fractionLength(3))))
                         LabeledContent("现在会", value: app.policy.shouldSettle(score: score, at: app.now) ? "沉淀" : "直接送达")
+                        let matched = app.keywords.matches(in: probe)
+                        LabeledContent("命中规则", value: matched.isEmpty ? "无" : matched.map { rule in
+                            "\(rule.pattern) \(rule.weight.formatted(.number.precision(.fractionLength(2))))" + (rule.category.map { "（\($0)）" } ?? "")
+                        }.joined(separator: "、"))
                     }
                 }
             }

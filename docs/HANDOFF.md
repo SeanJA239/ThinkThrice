@@ -76,12 +76,33 @@ All timings and thresholds live in `CalmCore/Sources/CalmCore/TimePolicy.swift`:
 
 - Create ML Text Classifier with exactly two labels, `impulsive` and `calm`. Export a `.mlmodel`.
 - Name it `ImpulseClassifier.mlmodel` and put it in `App/Model/`. Then run `xcodegen generate` (or drag it into the ThinkThrice target in Xcode) so it's in the app target; Xcode compiles it into the bundle.
-- The app loads it with `NLModel` and uses `predictedLabelHypotheses(for:maximumCount:)["impulsive"]` as the 0–1 score (`CoreMLScorer`). If the file isn't in the bundle, the app falls back to the keyword scorer. The demo panel shows which scorer is live (「Core ML（ImpulseClassifier）」 or 「关键词兜底（未找到模型）」), and its probe field shows the score for any sentence.
+- The app loads it with `NLModel` and uses `predictedLabelHypotheses(for:maximumCount:)["impulsive"]` as the 0–1 score (`CoreMLScorer`). The keyword rules always run next to it and the higher score wins (`MaxScorer`), because the model only separates anger from calm. Without the file, the keyword rules run alone. The demo panel shows which scorer is live (「Core ML + 关键词（N 条）」 or 「关键词（N 条，未找到模型）」), and its probe field shows the score and the matched rules for any sentence.
 - Thresholds from the evaluation report go into `TimePolicy` (`nightThreshold`, `dayThreshold`). They can also be tuned on site with the sliders; slider values are saved until 「清空所有对话」.
 - If the model ends up being a converted RoBERTa instead of Create ML, `CoreMLScorer` won't load it: that path needs tokenisation in the app and a new `Scorer` implementation. Talk to Sean first, as the plan says.
 - `CalmCore/Tests/CalmCoreTests/Fixtures/TinyImpulse.mlmodel` is a 30-sentence toy model used only to test the contract. Don't ship it.
 
-Workaround to know about: the plan's fallback was `NLTagger` sentiment, but on macOS 27 `NLTagger` has no sentiment scheme for Simplified Chinese and tags every Chinese sentence `Other` (English works). So the fallback is `KeywordScorer`, a small weighted lexicon of impulsive phrases combined with noisy-OR, joined with `NLTaggerScorer` through `MaxScorer`. Sadness words are deliberately not in the lexicon. It's good enough for the demo sentences but is not a model. Check on the demo iPhone whether iOS behaves the same; it probably does.
+## Keyword rules (for Ryan)
+
+The trained model only tells anger from calm, so the rest (late-night confessions, trying to win someone back, quitting in anger, blaming) comes from keyword rules in `App/Resources/Keywords.json`. Editing it needs no Swift:
+
+```json
+{
+  "rules": [
+    { "pattern": "滚", "weight": 0.9, "category": "攻击" },
+    { "pattern": "你.{0,6}(从来|总是)不", "weight": 0.5, "category": "指责", "regex": true }
+  ]
+}
+```
+
+- `pattern` is a plain substring (case-insensitive), or an ICU regular expression when `"regex": true`.
+- `weight` is 0…1. Every matching rule counts, combined with noisy-OR: 1 − Π(1 − weight). One rule at 0.9 settles a message day and night; 0.45 + 0.3 gives 0.615, which settles only at night (threshold 0.5 at night, 0.7 by day).
+- `category` is optional and only shown in the demo panel next to the match.
+- Sadness, hurt and asking for help must not match: 「我好难过」 is never held.
+- Check a change without building the app: `cd CalmCore && swift test`. `appKeywordFileLoadsAndLetsSadnessThrough` loads the real file, fails on a bad weight or a regular expression that doesn't compile, and checks a list of calm and sad sentences scores 0. Add your own must-not-hold sentences there.
+- On the phone, type sentences into the demo panel's probe: it shows the score, whether it would settle now, and which rules matched. An invalid file stops the app at launch with the reason in the Xcode console.
+- If the replacement needs more than patterns, `Scorer` (`func score(_ text: String) -> Double`, 0…1) is the seam: add another implementation and put it in the `MaxScorer` in `AppModel.init`.
+
+Workaround to know about: the plan's fallback was `NLTagger` sentiment, but on macOS 27 `NLTagger` has no sentiment scheme for Simplified Chinese and tags every Chinese sentence `Other` (English works). `NLTaggerScorer` is still in the mix for English text.
 
 ## Persistence
 

@@ -19,16 +19,36 @@ final class AppModel {
     /// Bumped on every demo clock change so views that show the time refresh at once.
     private(set) var clockRevision = 0
 
+    /// Keyword rules from `Resources/Keywords.json`, kept separately so the demo
+    /// panel can show which rules a sentence matched.
+    let keywords: KeywordScorer
+
+    /// An invalid file stops the app at launch with the reason, like the other
+    /// bundled JSON; `swift test` in CalmCore checks the file too.
+    private static func loadKeywords() -> KeywordScorer {
+        guard let url = Bundle.main.url(forResource: "Keywords", withExtension: "json") else {
+            fatalError("Keywords.json is missing from the app bundle")
+        }
+        do {
+            return try KeywordScorer(json: Data(contentsOf: url))
+        } catch {
+            fatalError("Keywords.json is invalid: \(error)")
+        }
+    }
+
     /// The file name the model side delivers: `App/Model/ImpulseClassifier.mlmodel`.
     static let bundledModelName = "ImpulseClassifier"
 
     init() {
+        keywords = Self.loadKeywords()
+        // The model only tells anger from calm, so keyword rules always run next to
+        // it and the higher score wins.
         if let model = CoreMLScorer(bundledModelNamed: Self.bundledModelName) {
-            scorer = model
-            scorerName = "Core ML（\(Self.bundledModelName)）"
+            scorer = MaxScorer([model, keywords])
+            scorerName = "Core ML + 关键词（\(keywords.rules.count) 条）"
         } else {
-            scorer = MaxScorer([KeywordScorer(), NLTaggerScorer()])
-            scorerName = "关键词兜底（未找到模型）"
+            scorer = MaxScorer([keywords, NLTaggerScorer()])
+            scorerName = "关键词（\(keywords.rules.count) 条，未找到模型）"
         }
         content = Content.load()
         if let thresholds = DemoSettings.thresholds {

@@ -24,6 +24,7 @@
 		BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D326594331CC0E301BAE37 /* DebugClockPanel.swift */; };
 		D5D61A5F6CD1CDF19766792B /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB42A16EC1F61B273389275 /* ConversationListView.swift */; };
 		D7E0F71D3DCF8E47D7DE89D5 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 67AE1CE8C5E5ED1B956A2075 /* ExyteChat */; };
+		E3EF4E2F93BD65A64F670665 /* Keywords.json in Resources */ = {isa = PBXBuildFile; fileRef = 72E7C00EFAA3C5CE5DFF382C /* Keywords.json */; };
 		E7040887459B1A807DC6BB72 /* RitualSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8D4BD3DE977D8775275059 /* RitualSheet.swift */; };
 		E76B83F6E3619328BDD1D439 /* Questions.json in Resources */ = {isa = PBXBuildFile; fileRef = 7902B4B9E729879CB13B948B /* Questions.json */; };
 		FF34946B6DD966EEF9745D71 /* Archive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852CD84A07368DE69B5157A2 /* Archive.swift */; };
@@ -39,6 +40,7 @@
 		5B58B8B9CADF74B0A748B58D /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
 		61D4C506115F14561F38F7B6 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreen.swift; sourceTree = "<group>"; };
+		72E7C00EFAA3C5CE5DFF382C /* Keywords.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Keywords.json; sourceTree = "<group>"; };
 		7902B4B9E729879CB13B948B /* Questions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Questions.json; sourceTree = "<group>"; };
 		852CD84A07368DE69B5157A2 /* Archive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Archive.swift; sourceTree = "<group>"; };
 		9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkThriceApp.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 		D0DC1D72680BCC866B8412C9 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				72E7C00EFAA3C5CE5DFF382C /* Keywords.json */,
 				7902B4B9E729879CB13B948B /* Questions.json */,
 				3A399F366DBCF659EB31D707 /* Scripts.json */,
 			);
@@ -208,6 +211,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E3EF4E2F93BD65A64F670665 /* Keywords.json in Resources */,
 				E76B83F6E3619328BDD1D439 /* Questions.json in Resources */,
 				2244ECDE3E5F7F964E5D0F3E /* Scripts.json in Resources */,
 			);
