@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		04A36B02A2B35E9CD3FD43AA /* CalmCore in Frameworks */ = {isa = PBXBuildFile; productRef = C850B1F949F52DDEDD022F12 /* CalmCore */; };
 		161042CF6FA5E96699981C53 /* ThinkThriceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */; };
+		1B79991CDC50A179A18D4EF5 /* ContactPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B61C033D0B157542B6C8C7F3 /* ContactPanel.swift */; };
 		1FB63148949A97BC0DA870A4 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61D4C506115F14561F38F7B6 /* AppModel.swift */; };
 		2244ECDE3E5F7F964E5D0F3E /* Scripts.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A399F366DBCF659EB31D707 /* Scripts.json */; };
 		23AFC753423360A0B03280DF /* MessageBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */; };
@@ -26,7 +27,6 @@
 		8FDFD50EC714861F1444F52D /* ThinkThriceAngerLite.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 1183279DB21C8FB67F1EBEA1 /* ThinkThriceAngerLite.mlmodel */; };
 		91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */; };
 		93F0C49E5E35928D92E2919F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7125896DB7D652FFB70B6C42 /* Theme.swift */; };
-		A61C155152C30DF4F49CA9F6 /* ContactSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1563DB735CB3CFBCE728A4D /* ContactSheet.swift */; };
 		B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B066620A1EA312BB709DD32D /* ActionPanel.swift */; };
 		BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D326594331CC0E301BAE37 /* DebugClockPanel.swift */; };
 		CCF78EED5DF4F12B837D05E7 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67511739D8BAFD3E64DBDF29 /* ProfileView.swift */; };
@@ -62,7 +62,7 @@
 		87CAE75C40641CB9F4F438AE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkThriceApp.swift; sourceTree = "<group>"; };
 		B066620A1EA312BB709DD32D /* ActionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPanel.swift; sourceTree = "<group>"; };
-		B1563DB735CB3CFBCE728A4D /* ContactSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSheet.swift; sourceTree = "<group>"; };
+		B61C033D0B157542B6C8C7F3 /* ContactPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPanel.swift; sourceTree = "<group>"; };
 		B882E3866ABA7704CA49F2E1 /* P2PTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = P2PTransport.swift; sourceTree = "<group>"; };
 		BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbles.swift; sourceTree = "<group>"; };
 		BCBA65584E653E4CED9490CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -97,7 +97,7 @@
 				788D8214D327ED0CACE2DE34 /* Atmosphere.swift */,
 				6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */,
 				5B58B8B9CADF74B0A748B58D /* ChatStore.swift */,
-				B1563DB735CB3CFBCE728A4D /* ContactSheet.swift */,
+				B61C033D0B157542B6C8C7F3 /* ContactPanel.swift */,
 				152C9D1FC299ADF363C23AA6 /* Content.swift */,
 				CCB42A16EC1F61B273389275 /* ConversationListView.swift */,
 				32D326594331CC0E301BAE37 /* DebugClockPanel.swift */,
@@ -269,7 +269,7 @@
 				40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */,
 				38E2AE136CE102528C9B2BA7 /* ChatStore.swift in Sources */,
 				91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */,
-				A61C155152C30DF4F49CA9F6 /* ContactSheet.swift in Sources */,
+				1B79991CDC50A179A18D4EF5 /* ContactPanel.swift in Sources */,
 				8947E32BDDE840B4F0A93E03 /* Content.swift in Sources */,
 				D5D61A5F6CD1CDF19766792B /* ConversationListView.swift in Sources */,
 				BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */,

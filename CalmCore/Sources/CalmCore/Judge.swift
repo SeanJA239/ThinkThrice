@@ -16,16 +16,27 @@ extension Recipient {
 /// (0 when no model loaded, so only the rules decide) and `ThinkThriceRules`.
 public struct ThinkThriceJudge: Sendable {
     public let classifier: ThinkThriceClassifier?
+    /// Workaround: on a device that has never used the Chinese BERT embedding,
+    /// its assets are missing and the main model returns no prediction at all
+    /// (probability exactly 0) until the system has downloaded them. A real
+    /// softmax output is never exactly 0, so on 0 the Lite model, which needs
+    /// no embedding, scores the sentence instead.
+    public let fallback: ThinkThriceClassifier?
 
-    public init(classifier: ThinkThriceClassifier?) {
+    public init(classifier: ThinkThriceClassifier?, fallback: ThinkThriceClassifier? = nil) {
         self.classifier = classifier
+        self.fallback = fallback
     }
 
     /// Shown in the demo panel, so the team can tell which model is live.
     public var modelName: String { classifier?.modelName ?? "未加载，只用规则" }
 
     public func modelProbability(_ text: String) -> Double {
-        classifier?.messageProbability(text) ?? 0
+        let p = classifier?.messageProbability(text) ?? 0
+        if p == 0, let fallback, fallback !== classifier {
+            return fallback.messageProbability(text)
+        }
+        return p
     }
 
     public func judge(_ text: String, to recipient: Recipient, lateNight: Bool) -> Verdict {

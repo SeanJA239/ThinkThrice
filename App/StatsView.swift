@@ -3,7 +3,8 @@ import Charts
 import SwiftUI
 
 /// 「三思」: progress in thinking twice. Holding fewer messages, and rewriting,
-/// waiting or letting go of the held ones, all count as progress.
+/// waiting or letting go of the held ones, all count as progress. The page opens
+/// with the week in words (`ThinkReview`), then highlights, then the numbers.
 struct StatsView: View {
     @Environment(AppModel.self) private var app
 
@@ -12,9 +13,18 @@ struct StatsView: View {
         let stats = app.stats.stats(calendar: app.policy.calendar)
         let weeks = stats.weeks(endingAt: app.now)
         let days = stats.daily(days: 14, endingAt: app.now)
+        let review = stats.review(endingAt: app.now)
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
+                    ReviewCard(review: review)
+                    if !review.insights.isEmpty {
+                        SectionTitle("亮点")
+                        VStack(spacing: 10) {
+                            ForEach(review.insights, id: \.kind) { InsightRow(insight: $0) }
+                        }
+                    }
+                    SectionTitle("数据")
                     ScoreCard(this: weeks.this, last: weeks.last)
                     tiles(this: weeks.this, last: weeks.last)
                     DailyChart(days: days)
@@ -43,7 +53,7 @@ struct StatsView: View {
     }
 }
 
-/// The week's 「三思指数」 as a ring, with the change from last week and one line of why.
+/// The week's 「三思指数」 as a ring, with the change from last week.
 private struct ScoreCard: View {
     let this: ThinkStats.Summary
     let last: ThinkStats.Summary
@@ -68,7 +78,7 @@ private struct ScoreCard: View {
                 Label(delta >= 0 ? "比上周 +\(delta)" : "比上周 \(delta)", systemImage: delta >= 0 ? "arrow.up.right" : "arrow.down.right")
                     .font(.headline)
                     .foregroundStyle(delta >= 0 ? .green : .orange)
-                Text(headline)
+                Text("放下、改写和等待越多，指数越高。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -78,16 +88,6 @@ private struct ScoreCard: View {
         .padding(18)
         .background(.background, in: .rect(cornerRadius: 22))
         .accessibilityElement(children: .combine)
-    }
-
-    private var headline: String {
-        guard let rate = this.holdRate else { return "这周还没发过消息。" }
-        let percent = Int((rate * 100).rounded())
-        guard let lastRate = last.holdRate else { return "写了 \(this.written) 条，\(percent)% 被冻住。" }
-        let lastPercent = Int((lastRate * 100).rounded())
-        if percent < lastPercent { return "冲动的消息少了：\(percent)% 被冻住，上周是 \(lastPercent)%。" }
-        if percent > lastPercent { return "这周有点上头：\(percent)% 被冻住，上周是 \(lastPercent)%。" }
-        return "\(percent)% 被冻住，和上周持平。"
     }
 }
 
@@ -175,5 +175,83 @@ private struct ExitsCard: View {
         }
         .padding(16)
         .background(.background, in: .rect(cornerRadius: 22))
+    }
+}
+
+/// The week in words, like the top of an Apple weekly summary.
+private struct ReviewCard: View {
+    let review: ThinkReview
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("本周回顾", systemImage: "sparkles")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.8))
+            Text(review.headline)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(.white)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(review.detail)
+                .font(.body)
+                .foregroundStyle(.white.opacity(0.9))
+                .fixedSize(horizontal: false, vertical: true)
+            Text(review.closing)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.top, 2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(Theme.gradient, in: .rect(cornerRadius: 24))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct SectionTitle: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.title3.weight(.bold))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 6)
+    }
+}
+
+/// One highlight: an icon, a short title and one sentence.
+private struct InsightRow: View {
+    let insight: ThinkInsight
+
+    var body: some View {
+        let (icon, color) = Self.style(insight.kind)
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(.white)
+                .frame(width: 40, height: 40)
+                .background(color.gradient, in: .circle)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(insight.title).font(.headline)
+                Text(insight.detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .background(.background, in: .rect(cornerRadius: 18))
+        .accessibilityElement(children: .combine)
+    }
+
+    private static func style(_ kind: ThinkInsight.Kind) -> (String, Color) {
+        switch kind {
+        case .calmStreak: ("leaf.fill", .green)
+        case .letGo: ("wind", .teal)
+        case .rewrite: ("pencil.and.scribble", Theme.brand)
+        case .tookTime: ("moon.zzz.fill", .indigo)
+        case .tryWaiting: ("sunrise.fill", .orange)
+        }
     }
 }

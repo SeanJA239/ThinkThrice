@@ -7,7 +7,7 @@ import Foundation
 /// lists, so day and night share one line (see `Verdict.impulse`).
 public struct TimePolicy: Sendable, Equatable {
     /// Night starts at this hour (inclusive), local time.
-    public var nightStartHour = 23
+    public var nightStartHour = 22
     /// Night ends at this hour (exclusive), local time.
     public var nightEndHour = 6
     /// A score at or above the threshold settles the message.

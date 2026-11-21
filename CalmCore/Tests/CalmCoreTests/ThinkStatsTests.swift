@@ -65,3 +65,37 @@ import Testing
         #expect(days[2].summary.count(.letGo) == 1)
     }
 }
+
+@Suite struct ThinkReviewTests {
+    func events(_ kinds: [ThinkEvent.Kind], on day: Int) -> [ThinkEvent] {
+        kinds.map { ThinkEvent($0, at: at(day, 12)) }
+    }
+
+    func review(_ events: [ThinkEvent]) -> ThinkReview {
+        ThinkStats(events: events, calendar: shanghai).review(endingAt: at(21, 20))
+    }
+
+    @Test func headlineFollowsTheHoldRate() {
+        // Last week (8–14 Nov) half was held; this week a quarter.
+        let better = events([.sentDirectly, .held], on: 10) + events([.sentDirectly, .sentDirectly, .sentDirectly, .held], on: 20)
+        #expect(review(better).headline == "这周，你更常先停下来。")
+        #expect(review(better).detail.hasPrefix("被冻住的消息占 25%，上周是 50%。"))
+        let worse = events([.sentDirectly, .sentDirectly, .sentDirectly, .held], on: 10) + events([.sentDirectly, .held], on: 20)
+        #expect(review(worse).headline == "这周，情绪起伏多了一些。")
+        #expect(review([]).headline == "这周很安静。")
+        #expect(review(events([.sentDirectly], on: 20)).headline == "这周，你说的每句话都很平静。")
+    }
+
+    @Test func calmStreakSkipsQuietDaysAndStopsAtAHold() {
+        let log = events([.held], on: 17) + events([.sentDirectly], on: 18) + events([.sentDirectly], on: 20) + events([.sentDirectly], on: 21)
+        #expect(ThinkStats(events: log, calendar: shanghai).calmStreak(endingAt: at(21, 20)) == 3)
+        #expect(review(log).insights.first?.title == "连续 3 天心平气和")
+    }
+
+    @Test func waitingTipOnlyWhenTheRitualWins() {
+        let ritualHeavy = events([.held, .held, .ritualSent, .ritualSent, .letGo], on: 20)
+        #expect(review(ritualHeavy).insights.contains { $0.kind == .tryWaiting })
+        let reflective = events([.held, .held, .ritualSent, .letGo, .rewroteCalm], on: 20)
+        #expect(!review(reflective).insights.contains { $0.kind == .tryWaiting })
+    }
+}

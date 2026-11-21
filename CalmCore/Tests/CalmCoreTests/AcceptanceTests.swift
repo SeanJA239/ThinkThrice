@@ -1,5 +1,6 @@
 import CoreML
 import Foundation
+import NaturalLanguage
 import Testing
 @testable import CalmCore
 
@@ -31,8 +32,10 @@ import Testing
         return try ThinkThriceClassifier(compiledModelURL: MLModel.compileModel(at: url))
     }
 
-    func check(_ file: String, model: String) throws {
+    /// `fallback` is the app's path: the Lite model scores a sentence the main one gives no prediction for.
+    func check(_ file: String, model: String, fallback: String? = nil) throws {
         let classifier = try Self.classifier(model)
+        let judge = ThinkThriceJudge(classifier: classifier, fallback: try fallback.map(Self.classifier))
         let rows = try Self.rows(file)
         #expect(!rows.isEmpty)
         for row in rows where row.kind != "limit" {
@@ -40,16 +43,28 @@ import Testing
                 let result = ThinkThriceRules.answerStillAngry(row.text, modelProb: classifier.answerProbability(row.text))
                 #expect(result.angry == (row.expect == "angry"), "\(row.text)（\(row.note)）")
             } else {
-                let p = classifier.messageProbability(row.text)
+                let p = judge.modelProbability(row.text)
                 let v = ThinkThriceRules.judgeMessage(row.text, modelProb: p, to: row.to, lateNight: true, contextFactor: row.ctx)
                 #expect(v.lock == (row.expect == "lock"), "\(row.to.rawValue)：\(row.text) 模型 \(p) 分 \(v.score) \(v.reason.rawValue) \(v.matched)（\(row.note)）")
             }
         }
     }
 
+    /// On a machine that has never used it, the Chinese BERT embedding the main
+    /// model runs on is missing and every prediction comes back empty until the
+    /// system downloads it. Wait for it first, as the app does at launch.
+    static func ensureEmbeddingAssets() async throws {
+        let embedding = try #require(NLContextualEmbedding(language: .simplifiedChinese))
+        if !embedding.hasAvailableAssets {
+            let result = try await embedding.requestAssets()
+            try #require(result == .available, "Chinese BERT assets are not available")
+        }
+    }
+
     @Test(arguments: ["demo_script", "boss_probe", "demo_v2"])
-    func mainModelPassesEverySentence(file: String) throws {
-        try check(file, model: "ThinkThriceAnger")
+    func mainModelPassesEverySentence(file: String) async throws {
+        try await Self.ensureEmbeddingAssets()
+        try check(file, model: "ThinkThriceAnger", fallback: "ThinkThriceAngerLite")
     }
 
     /// The fallback model passes the stage script and the boss probe; on
@@ -60,7 +75,8 @@ import Testing
     }
 
     /// The app's own call path: per-contact scene factor and the day/night switch.
-    @Test func judgeUsesContactFactorAndNight() throws {
+    @Test func judgeUsesContactFactorAndNight() async throws {
+        try await Self.ensureEmbeddingAssets()
         let judge = ThinkThriceJudge(classifier: try Self.classifier("ThinkThriceAnger"))
         let night = judge.judge("我想复合了", to: .ex, lateNight: true)
         #expect(night.lock)

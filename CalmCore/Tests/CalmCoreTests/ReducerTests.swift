@@ -46,8 +46,8 @@ func apply(_ message: CalmMessage, _ events: [SettleEvent], now: Date) -> CalmMe
     }
 
     @Test func nightWindowBoundaries() {
-        #expect(policy.isNight(at(21, 23)))
-        #expect(!policy.isNight(at(21, 22, 59)))
+        #expect(policy.isNight(at(21, 22)))
+        #expect(!policy.isNight(at(21, 21, 59)))
         #expect(policy.isNight(at(22, 5, 59)))
         #expect(!policy.isNight(at(22, 6)))
     }
@@ -62,7 +62,7 @@ func apply(_ message: CalmMessage, _ events: [SettleEvent], now: Date) -> CalmMe
 
 @Suite struct SettleDurationTests {
     @Test func beforeMidnightSettlesUntilNextMorning() {
-        #expect(sent("a", score: 0.9, at: at(21, 23, 30)).settleUntil == at(22, 9))
+        #expect(sent("a", score: 0.9, at: at(21, 22, 10)).settleUntil == at(22, 9))
     }
 
     @Test func afterMidnightSettlesUntilThisMorning() {
@@ -71,7 +71,7 @@ func apply(_ message: CalmMessage, _ events: [SettleEvent], now: Date) -> CalmMe
     }
 
     @Test func daySettlesFifteenMinutes() {
-        #expect(sent("a", score: 0.9, at: at(21, 22, 59)).settleUntil == at(21, 23, 14))
+        #expect(sent("a", score: 0.9, at: at(21, 21, 59)).settleUntil == at(21, 22, 14))
         #expect(sent("a", score: 0.9, at: at(22, 6)).settleUntil == at(22, 6, 15))
     }
 

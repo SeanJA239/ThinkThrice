@@ -40,6 +40,7 @@ ThinkThrice/
 │  │  ├─ ThinkThriceClassifier.swift  Ryan's model loader and scorer
 │  │  ├─ Judge.swift           ThinkThriceJudge (model + rules for a recipient), scene factors
 │  │  ├─ ThinkStats.swift      ThinkEvent log and the 三思 progress summary
+│  │  ├─ ThinkReview.swift     the 三思 page's headline, closing line and highlights
 │  │  ├─ Clock.swift           CalmClock protocol, SystemClock, DemoClock
 │  │  ├─ Sentences.swift       rule-based splitter for the melt editor
 │  │  └─ MessageTransport.swift  MessageTransport protocol, WireMessage, ScriptedTransport
@@ -52,7 +53,7 @@ ThinkThrice/
    ├─ Atmosphere.swift         day/night chat backdrop; snow while a message is frozen
    ├─ Theme.swift              brand violet, avatars
    ├─ StatsStore.swift, StatsView.swift   三思 tab: event log and progress page
-   ├─ SettingsView.swift, ProfileView.swift, ContactSheet.swift
+   ├─ SettingsView.swift, ProfileView.swift, ContactPanel.swift
    ├─ Model/                   ThinkThriceAnger.mlmodel (main) and ThinkThriceAngerLite.mlmodel (fallback)
    ├─ Haptics.swift            one haptic per settle-flow moment
    ├─ Assets.xcassets          app icon
@@ -81,12 +82,12 @@ The chat's contact header is a Liquid Glass capsule with the avatar initial, an 
 
 Demo controls: in a chat, press and hold the contact header (or 设置 → 打开演示面板) to open the demo panel. A plain tap on the header opens the contact sheet. It can jump to 01:30, fast-forward to 09:00 or by 15 minutes, return to real time, adjust the night and day thresholds with sliders, score any sentence against the live detector for 前任 / 老板 / 其他 (model probability, impulse score, reason, matched words), switch the two-phone mode, and 「清空所有对话」 for a fresh rehearsal (deletes saved conversations, resets the demo clock and thresholds). While the clock is shifted, the header's status line adds 「演示时间 …」.
 
-All timings and thresholds live in `CalmCore/Sources/CalmCore/TimePolicy.swift`: night 23:00–6:00, threshold 0.5 at night and 0.7 by day (a score ≥ threshold settles), night settles until 9:00, day settles 15 minutes, 3 ritual pages at night and 1 by day, 5 s per ritual page, 1.5 s per melt-editor piece.
+All timings and thresholds live in `CalmCore/Sources/CalmCore/TimePolicy.swift`: night 22:00–6:00 (moved from 23:00 at Ryan's suggestion), lock line 0.6 day and night (a score ≥ it settles), night settles until 9:00, day settles 15 minutes, 3 ritual pages at night and 1 by day, 5 s per ritual page, 1.5 s per melt-editor piece.
 
 ## Motion and haptics
 
 - **Freeze**: a held message first shows as a normal blue bubble, then the colour drains, a frosty glint appears and a glass shell closes around it with a burst of snowflakes (`SettlingBubble.freeze()`), with a heavy-then-rigid haptic. It replays when a rewrite is rescored and still too impulsive.
-- **Day and night**: the chat's backdrop is a pale sky by day and a deep violet sky at night (23:00–6:00 on the demo clock), crossfading over 1.2 s; at night the chat and its sheets switch to dark mode.
+- **Day and night**: the chat's backdrop is a pale sky by day and a deep violet sky at night (22:00–6:00 on the demo clock), crossfading over 1.2 s; at night the chat and its sheets switch to dark mode.
 - **Snow**: flakes fall behind the chat only while a message in it is frozen (`ChatStore.heldCount > 0`).
 - **Ritual**: each page shows a breathing flower like the Apple Watch Breathe app: six translucent petals bloom out and turn while breathing in (first half of the 5 s wait) and fold back while breathing out. The ritual sheet is always dark. 「下一题」 unlocks with a light tick.
 - **Melt editor**: unrevealed sentences sit in frozen blocks that blur away one by one as they thaw into the editor.
@@ -103,7 +104,7 @@ Ryan delivered the detector on 2026-11-21 (`ThinkThrice_交付.zip`, model v2c).
 - **Model**: `App/Model/ThinkThriceAnger.mlmodel` (Create ML on BERT embeddings, 1.3 MB, labels `angry` / `other`), with `ThinkThriceAngerLite.mlmodel` (MaxEnt, 0.3 MB) as the fallback when the main one won't load. `ThinkThriceClassifier` loads them by these names, so don't rename them. MD5s match the handoff: `1526d5c2…` and `ab1367e4…`.
 - **Rules**: `CalmCore/Sources/CalmCore/ThinkThriceRules.swift`, checked top to bottom, first hit wins: 辱骂 (`insult`, anyone, any time) → 怼老板 (`bossRant`, to the boss) → 深夜想复合 / 深夜辞职 (`reconcile` to an ex / `quit` to the boss, late night only) → greetings only (sent) → polite boss messages (never locked by the model alone) → model score `(0.7 × p × 100 + 0.3 × punctuation) × scene factor`, locked at 60.
 
-How the app calls it (`ThinkThriceJudge`, `ChatStore.score`): each conversation has a `recipient` in `Scripts.json` (`ex` for 前任, `boss` for 老板, `other` for the two-phone chat), with Ryan's scene factors 2.0 / 1.6 / 1.0. `lateNight` is the demo clock's night (23:00–6:00). The verdict's 0–100 score divided by 100 goes into the state machine, and both `TimePolicy` thresholds default to 0.6, so a message settles exactly when Ryan's verdict says lock. Without any model the rules decide alone.
+How the app calls it (`ThinkThriceJudge`, `ChatStore.score`): each conversation has a `recipient` in `Scripts.json` (`ex` for 前任, `boss` for 老板, `other` for 组员 and the two-phone chat), with Ryan's scene factors 2.0 / 1.6 / 1.0. `lateNight` is the demo clock's night (22:00–6:00, as Ryan suggested). The verdict's 0–100 score divided by 100 goes into the state machine, and both `TimePolicy` thresholds default to 0.6, so a message settles exactly when Ryan's verdict says lock. Without any model the rules decide alone.
 
 Ryan's two Swift files are copied unchanged except for `public` and `Sendable` so they can live in CalmCore. To add a word, add a string to the right list in `ThinkThriceRules.swift`, and put words that a short one would wrongly hit into that list's `except`. Then run `cd CalmCore && swift test`: `AcceptanceTests` runs all of Ryan's acceptance sentences (`Fixtures/demo_script.csv`, `boss_probe.csv`, `demo_v2.csv`, judged as late night) through the real main model, and the stage script and boss probe through the Lite model. To add a sentence, add a CSV row (`句子,msg,boss,1.6,lock,备注`).
 
@@ -111,17 +112,18 @@ Not used: `answerStillAngry` (the ritual questions are not answered in this app,
 
 Stage script (all verified): 老板 「老板我今天需要请一个病假」 sends; 老板 「你是不是脑子有问题？天天让人加班」 locks; 前任 「在吗」 sends; 前任 「我想复合了」 locks **only at night**, so jump the demo clock to 01:30 first (the demo panel's 「跳到 01:30」 is the 「强制深夜」 switch Ryan asks for).
 
-Risk to check on the iPhone: the main model runs on the system's Chinese BERT embedding (`NLContextualEmbedding`). On a fresh cloud Mac the very first `swift test` run got no prediction at all for 5 of the 109 sentences (probability exactly 0, so only the rules decided and those 5 went through), and the next five runs all passed. The likely cause, not proven, is that the embedding assets were still being prepared on first use. Workaround: the app asks for the assets at launch (`AppModel.prepareEmbeddingAssets`), and the demo panel's 「中文 BERT 资源」 row must say 已就绪 before going on stage. Also send one test message after installing on a new phone.
+Risk to check on the iPhone: the main model runs on the system's Chinese BERT embedding (`NLContextualEmbedding`). On a device that has never used it, those assets are missing and the main model returns no prediction at all for every sentence (checked on a fresh cloud Mac: 111 of 111 blank, retries don't help); the first attempt makes the system download them, and about a minute later the same model scores normally (「你懂个屁」 0.86, 「晚安，早点睡」 0.04). Until then only the rules would decide. So: the app requests the assets at launch (`AppModel.prepareEmbeddingAssets`), `ThinkThriceJudge` falls back to the Lite model (which needs no embedding) for any sentence the main model scores exactly 0, and the demo panel's 「中文 BERT 资源」 row must say 已就绪 before going on stage. Open the app on the demo phone with network a few minutes before presenting. `AcceptanceTests` waits for the assets the same way.
+
 
 Workaround to know about: the plan's fallback was `NLTagger` sentiment, but on macOS 27 `NLTagger` has no sentiment scheme for Simplified Chinese. It is no longer used.
 
 ## App shell
 
 - **Tabs**: 聊天, 三思 and 设置. The tab bar hides inside a chat.
-- **三思 (progress)**: every step of the settle flow is logged as a `ThinkEvent` (`StatsStore`, `Conversations/stats.json`). The page shows the week's 「三思指数」 against last week, tiles for frozen / rewritten / let go / cooled-or-waited, a 14-day chart of messages sent versus frozen, and how frozen messages ended. The index (`ThinkStats.Summary.score`) is half holding less, half handling held messages reflectively (letting go and calm rewrites count fully, waiting and still-impulsive rewrites half, the ritual not at all), plus up to 10 for cooling pauses. On first launch two weeks of example history are seeded so the page isn't empty in a demo; the page says so, and 设置 → 清除示例统计 removes them.
+- **三思 (progress)**: every step of the settle flow is logged as a `ThinkEvent` (`StatsStore`, `Conversations/stats.json`). The page opens with the week in words, written in the tone of Apple's Health and Screen Time summaries (second person, plain, specific numbers, encouraging, no exclamation marks): a headline (「这周，你更常先停下来。」), a sentence of evidence, a closing line, and up to four highlights (calm streak, messages let go, calm rewrites, time taken, and a gentle tip when the ritual wins). The wording lives in `CalmCore/Sources/CalmCore/ThinkReview.swift` and is unit-tested. Below it come the numbers: the week's 「三思指数」 against last week, tiles for frozen / rewritten / let go / cooled-or-waited, a 14-day chart of messages sent versus frozen, and how frozen messages ended. The index (`ThinkStats.Summary.score`) is half holding less, half handling held messages reflectively (letting go and calm rewrites count fully, waiting and still-impulsive rewrites half, the ritual not at all), plus up to 10 for cooling pauses. On first launch two weeks of example history are seeded so the page isn't empty in a demo; the page says so, and 设置 → 清除示例统计 removes them.
 - **设置**: the two lock lines (live), the fixed timings, notification and privacy switches (saved, not wired up yet), clear example stats, clear all conversations, and the demo panel.
 - **Profile**: the avatar at the top left of 聊天 opens it: name and signature (editable), this week's index, let-gos and cooling pauses, a global status, share, and badges. Modelled on the Luma profile layout; the Mobbin reference needs a login, so the exact screen wasn't seen.
-- **Contact sheet** (tap the chat header): the status this side shows the other (在线 / 冷静中 / 忙碌 / 显示离线), call / video / search (front end only) and mute, note (renames the chat), mute, pin (pins it in the list), and the cooling switch. Status, note, mute and pin are saved with the conversation.
+- **Contact card** (tap the chat header): a glass card that grows down out of the capsule, not a sheet; its height is capped so its bottom stays above the keyboard, and it scrolls when that is short. Tap outside or the chevron to fold it back. It holds the status this side shows the other (在线 / 冷静中 / 忙碌 / 显示离线), call / video / search (front end only) and mute, the cooling switch, note (renames the chat), mute and pin (pins it in the list). Status, note, mute and pin are saved with the conversation.
 - **Cooling pause** (the snowflake at the top right, or the contact sheet): for 15 minutes, messages I send are held until it ends (`SettleEvent.hold(until:)`, no scoring, not counted as impulsive) and the other side's replies are kept back; the header shows 「双方冷静中 · 还剩 mm:ss」 and the input says until when. When it ends, held replies arrive and my messages are ready to confirm. Over two phones the other side doesn't see the pause yet: only text crosses the wire.
 
 ## Persistence

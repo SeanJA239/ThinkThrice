@@ -17,10 +17,10 @@ final class AppModel {
     let content: Content
     let notifications = Notifications()
     /// Whether the Chinese BERT embedding the main model runs on is on this device.
-    /// Workaround: on a fresh Mac the first test run got no prediction at all from
-    /// ThinkThriceAnger for some sentences (probability 0, so only the rules
-    /// decided) and every later run was fine, so the app asks for the assets at
-    /// launch and the demo panel shows this before going on stage.
+    /// Workaround: the assets are missing on a device that has never used them,
+    /// and until they are downloaded the main model gives no prediction (the
+    /// judge falls back to the Lite model meanwhile). The app asks for them at
+    /// launch, and the demo panel shows this before going on stage.
     private(set) var embeddingStatus = "检查中…"
 
     private func prepareEmbeddingAssets() {
@@ -47,9 +47,16 @@ final class AppModel {
 
     init() {
         let classifier = ThinkThriceClassifier()
-        judge = ThinkThriceJudge(classifier: classifier)
+        // The Lite model also stands in when the main one gives no prediction (see `ThinkThriceJudge.fallback`).
+        let lite = classifier?.modelName == "ThinkThriceAngerLite" ? nil : Bundle.main
+            .url(forResource: "ThinkThriceAngerLite", withExtension: "mlmodelc")
+            .flatMap { try? ThinkThriceClassifier(compiledModelURL: $0) }
+        judge = ThinkThriceJudge(classifier: classifier, fallback: lite)
         // Warm up off the main thread so the first message isn't slow.
-        Task.detached { classifier?.warmUp() }
+        Task.detached {
+            classifier?.warmUp()
+            lite?.warmUp()
+        }
         content = Content.load()
         stats = StatsStore(now: Date())
         if let thresholds = DemoSettings.thresholds {

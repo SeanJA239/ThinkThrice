@@ -8,6 +8,8 @@ struct ChatScreen: View {
     @Bindable var store: ChatStore
     @State private var showDebugPanel = false
     @State private var showContact = false
+    /// Top of the keyboard in screen coordinates, nil while it is hidden.
+    @State private var keyboardTop: CGFloat?
     @State private var confirmCooling = false
 
     var body: some View {
@@ -37,7 +39,9 @@ struct ChatScreen: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 ChatHeader(store: store)
-                    .onTapGesture { showContact = true }
+                    .onTapGesture {
+                        withAnimation(.spring(duration: 0.45, bounce: 0.25)) { showContact.toggle() }
+                    }
                     // Hidden entry to the demo panel: press and hold the header.
                     .onLongPressGesture(minimumDuration: 0.8) { showDebugPanel = true }
                     .accessibilityAddTraits(.isButton)
@@ -58,9 +62,12 @@ struct ChatScreen: View {
         } message: {
             Text(store.isCooling ? "暂停中的回复会立刻出现。" : "15 分钟内，你发的消息会先冻住，对方的回复也先不显示；TA 会看到你「冷静中」。")
         }
-        .sheet(isPresented: $showContact) {
-            ContactSheet(store: store)
-                .nightSheet(night, otherwise: systemScheme)
+        .overlay(alignment: .top) { contactCard }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
+            if let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect { keyboardTop = frame.minY }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardTop = nil
         }
         .toolbar(.hidden, for: .tabBar)
         .sheet(item: $store.route) { route in
@@ -80,6 +87,35 @@ struct ChatScreen: View {
         }
         .toolbarColorScheme(night ? .dark : nil, for: .navigationBar)
         .environment(\.colorScheme, night ? .dark : systemScheme)
+    }
+
+    /// The contact card grows down out of the header capsule (scaling from the top
+    /// centre, where the capsule is) instead of rising as a sheet. Its height is
+    /// capped so its bottom stays 12 pt above the keyboard when the keyboard is up.
+    private var contactCard: some View {
+        GeometryReader { geo in
+            let frame = geo.frame(in: .global)
+            let bottom = min(frame.maxY, keyboardTop ?? .infinity) - 12
+            ZStack(alignment: .top) {
+                if showContact {
+                    Color.black.opacity(0.15)
+                        .ignoresSafeArea()
+                        .onTapGesture(perform: closeContact)
+                        .transition(.opacity)
+                    ContactPanel(store: store, maxHeight: max(180, bottom - frame.minY - 8), close: closeContact)
+                        .frame(maxWidth: 420)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
+                        .transition(.scale(scale: 0.2, anchor: .top).combined(with: .opacity))
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .allowsHitTesting(showContact)
+    }
+
+    private func closeContact() {
+        withAnimation(.spring(duration: 0.35, bounce: 0.15)) { showContact = false }
     }
 
     private var inputPlaceholder: String {
