@@ -46,6 +46,12 @@ final class AppModel {
     private(set) var clockRevision = 0
 
     init() {
+        // UI tests start every run from the seed conversations and default settings.
+        if ProcessInfo.processInfo.environment["THINKTHRICE_RESET"] == "1" {
+            ConversationArchive.deleteAll()
+            DemoSettings.reset()
+            DemoSettings.p2pRole = nil
+        }
         let classifier = ThinkThriceClassifier()
         // The Lite model also stands in when the main one gives no prediction (see `ThinkThriceJudge.fallback`).
         let lite = classifier?.modelName == "ThinkThriceAngerLite" ? nil : Bundle.main
