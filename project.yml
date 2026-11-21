@@ -21,14 +21,17 @@ targets:
       - path: App
         excludes:
           - "**/*.md"
+      - Shared
     dependencies:
       - package: ExyteChat
       - package: CalmCore
+      - target: ThinkThriceWidgets
     info:
       path: App/Info.plist
       properties:
         NSLocalNetworkUsageDescription: ThinkThrice 用本地网络和另一台手机直接收发消息。
         NSFaceIDUsageDescription: ThinkThrice 用 Face ID 确认是你本人在查看冷静中的消息。
+        NSSupportsLiveActivities: true
         NSBonjourServices:
           - _calmchat._tcp
     settings:
@@ -41,7 +44,7 @@ targets:
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: 9J8U5228KR
         GENERATE_INFOPLIST_FILE: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -49,6 +52,28 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+  ThinkThriceWidgets:
+    type: app-extension
+    platform: iOS
+    sources: [Widgets, Shared]
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: ThinkThrice
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.thinkthrice.app.widgets
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 9J8U5228KR
+        GENERATE_INFOPLIST_FILE: YES
   ThinkThriceUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -60,7 +85,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: 9J8U5228KR
 schemes:
   ThinkThrice:
     build:

@@ -389,6 +389,7 @@ final class ChatStore: Identifiable {
             entries: entries, repliesUsed: repliesUsed, coolUntil: coolUntil, heldIncoming: heldIncoming,
             myStatus: myStatus, note: note, muted: muted, pinned: pinned
         ).save(id: id)
+        app.liveActivities.sync(self, offset: app.clock.offsetFromRealTime)
     }
 
     /// Rebuilds the conversation from its archive. Sheets didn't survive the

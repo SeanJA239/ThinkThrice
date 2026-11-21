@@ -17,6 +17,7 @@ final class AppModel {
     let judge: ThinkThriceJudge
     let content: Content
     let notifications = Notifications()
+    let liveActivities = LiveActivities()
     /// Whether the Chinese BERT embedding the main model runs on is on this device.
     /// Workaround: the assets are missing on a device that has never used them,
     /// and until they are downloaded the main model gives no prediction (the
@@ -127,6 +128,11 @@ final class AppModel {
             conversations.append(ChatStore(conversation: Self.nearbyConversation, app: self, p2pRole: p2pRole))
         }
         stores = conversations
+        syncLiveActivities()
+    }
+
+    private func syncLiveActivities() {
+        for store in stores { liveActivities.sync(store, offset: clock.offsetFromRealTime) }
     }
 
     /// For rehearsals: deletes every saved conversation and setting and starts the
@@ -177,5 +183,6 @@ final class AppModel {
         clockRevision += 1
         tickAll()
         for store in stores { store.rescheduleNotifications() }
+        syncLiveActivities()
     }
 }

@@ -48,7 +48,7 @@ struct ConversationListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { showProfile = true } label: {
-                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 48)
+                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 52)
                             .padding(4)
                             .glassEffect(.regular.interactive(), in: .circle)
                     }

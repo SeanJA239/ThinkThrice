@@ -26,5 +26,7 @@
 	<string>ThinkThrice 用 Face ID 确认是你本人在查看冷静中的消息。</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>ThinkThrice 用本地网络和另一台手机直接收发消息。</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 </dict>
 </plist>
