@@ -23,13 +23,12 @@ struct ChatScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                VStack(spacing: 0) {
-                    Text(store.peer.name).font(.headline)
-                    DemoTimeCaption()
-                }
-                // Hidden entry to the demo clock: triple-tap the title.
-                .onTapGesture(count: 3) { showDebugPanel = true }
+                ChatHeader(store: store)
+                    // Hidden entry to the demo clock: triple-tap the header.
+                    .onTapGesture(count: 3) { showDebugPanel = true }
             }
+            // The header draws its own glass capsule.
+            .sharedBackgroundVisibility(.hidden)
         }
         .sheet(item: $store.route) { route in
             switch route {
@@ -57,18 +56,55 @@ struct ChatScreen: View {
     }
 }
 
-/// Shows the demo time under the title while the demo clock is shifted, so the audience can follow it.
-struct DemoTimeCaption: View {
+/// The contact bar: avatar, name and status in a Liquid Glass capsule. The status
+/// reads 「在线」 or 「正在输入…」, plus the demo time while the demo clock is shifted.
+struct ChatHeader: View {
     @Environment(AppModel.self) private var app
+    let store: ChatStore
 
     var body: some View {
+        HStack(spacing: 10) {
+            Text(String(store.peer.name.prefix(1)))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 32, height: 32)
+                .background(.indigo.gradient, in: .circle)
+                .overlay(alignment: .bottomTrailing) {
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 10, height: 10)
+                        .overlay(Circle().stroke(.background, lineWidth: 2))
+                }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(store.peer.name)
+                    .font(.subheadline.weight(.semibold))
+                TimelineView(.periodic(from: .now, by: 1)) { _ in
+                    statusLine
+                }
+            }
+        }
+        .padding(.leading, 5)
+        .padding(.trailing, 16)
+        .padding(.vertical, 5)
+        .glassEffect(.regular.interactive(), in: .capsule)
+        .contentShape(.capsule)
+        .animation(.smooth, value: store.peerIsTyping)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("chatHeader")
+    }
+
+    @ViewBuilder private var statusLine: some View {
         let _ = app.clockRevision
-        if app.clock.isShifted {
-            TimelineView(.periodic(from: .now, by: 1)) { _ in
-                Text("演示时间 \(app.now.formatted(date: .omitted, time: .shortened))")
-                    .font(.caption2)
+        HStack(spacing: 0) {
+            Text(store.peerIsTyping ? "正在输入…" : "在线")
+                .foregroundStyle(store.peerIsTyping ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+                .contentTransition(.opacity)
+            if app.clock.isShifted {
+                Text(" · 演示时间 \(app.now.formatted(date: .omitted, time: .shortened))")
                     .foregroundStyle(.secondary)
             }
         }
+        .font(.caption2)
+        .lineLimit(1)
     }
 }

@@ -15,7 +15,7 @@ Everything in the plan up to M2 works, plus most of M3. It was built and run on 
 | M3 local notification | Written, not checked on a device |
 | M3 SwiftData persistence | Not started (first in the cut list) |
 | M3 Core ML scorer with model v1 | Code and contract test done; waiting for Ryan's model |
-| M4 Liquid Glass polish, animations, accessibility | Partly: glass input bar, bubbles and sheets, VoiceOver labels on held bubbles, Reduce Motion on dissolve |
+| M4 Liquid Glass polish, animations, accessibility | Partly: glass contact header, input bar, bubbles and sheets, in-bubble glass-to-solid transition on delivery, VoiceOver labels on held bubbles, Reduce Motion on dissolve |
 | Two-device demo (optional, after M3) | Only the transport protocol exists; see "Two devices" |
 
 How it was checked:
@@ -43,15 +43,15 @@ ThinkThrice/
 └─ App/
    ├─ ThinkThriceApp.swift, AppModel.swift   app services: demo clock, policy, scorer, content, stores
    ├─ ChatStore.swift          one conversation: records by message id, side effects, sheet routing
-   ├─ ChatScreen.swift         exyte ChatView, messageBuilder, inputViewBuilder, sheets, banner
+   ├─ ChatScreen.swift         exyte ChatView, messageBuilder, inputViewBuilder, sheets, banner, ChatHeader
    ├─ ConversationListView.swift, InputBar.swift, Content.swift, Notifications.swift, DebugClockPanel.swift
-   ├─ Bubbles/HeldBubbles.swift   SettlingBubble, ReadyBubble, DissolveBubble
+   ├─ Bubbles/HeldBubbles.swift   CalmMessageCell, DeliveredBubble, SettlingBubble, ReadyBubble, DissolveBubble
    ├─ Sheets/                  ActionPanel, RitualSheet, ConfirmSheet, MeltEditor
    ├─ Resources/Questions.json, Scripts.json   copy the non-tech teammates edit
    └─ Model/                   drop the model here (see below)
 ```
 
-How a message moves: exyte calls `didSendMessage` → `ChatStore.submit` adds a `CalmMessage` in `.scoring` → the scorer runs off the main actor → `reduce(.scored)` → delivered (sent through `MessageTransport`, which triggers the scripted reply) or settling (notification scheduled). exyte's `Message` is display-only; `messageBuilder` looks up `records[message.id]` to choose the glass bubble or exyte's default bubble. Every state change bumps `Message.triggerRedraw` so the table row redraws.
+How a message moves: exyte calls `didSendMessage` → `ChatStore.submit` adds a `CalmMessage` in `.scoring` → the scorer runs off the main actor → `reduce(.scored)` → delivered (sent through `MessageTransport`, which triggers the scripted reply) or settling (notification scheduled). exyte's `Message` is display-only; `messageBuilder` looks up `records[message.id]`: every outgoing message has a record and is drawn with our own bubbles (solid `DeliveredBubble` in exyte's theme colours once delivered, glass while held); messages from the other side use exyte's default bubble. Every state change bumps `Message.triggerRedraw` so the table row redraws.
 
 State machine as implemented (`SettleState`): `scoring → delivered | settling`; `settling → ready` on tick once `settleUntil` passes; `settling/ready → ritual(step, total) → delivered` (or back on 「算了」); `ready → confirming → delivered` (or back to `ready`); `settling/ready → rewriting(revealed) → rescoring → delivered | settling/ready`; any held state `→ dissolving → dissolved`. `settleUntil` is set once and never reset, so ritual, confirm and rewrite branches all return to the same countdown. Events that don't apply leave the message unchanged.
 
@@ -63,7 +63,9 @@ On a Mac with Xcode 26 or later (the demo iPhone needs iOS 26 or later):
 2. `cd CalmCore && swift test` runs the core tests. They also run from Xcode if you add the package's test target to the scheme.
 3. After editing `project.yml` or adding or removing files under `App/`, run `xcodegen generate` (`brew install xcodegen`) and commit the regenerated project. Adding a file only through Xcode also works, but then `project.yml` is out of date.
 
-Demo controls: in a chat, triple-tap the title to open the demo panel. It can jump to 01:30, fast-forward to 09:00 or by 15 minutes, return to real time, adjust the night and day thresholds with sliders, and score any sentence with the live scorer. While the clock is shifted, the title shows 「演示时间 …」.
+The chat's contact header is a Liquid Glass capsule with the avatar initial, an online dot, the name and a status line: 「在线」, or 「正在输入…」 while a scripted reply is on its way (`ChatStore.peerIsTyping`). The scripted peers are always online; a P2P transport would need to report presence and typing itself.
+
+Demo controls: in a chat, triple-tap the contact header to open the demo panel. It can jump to 01:30, fast-forward to 09:00 or by 15 minutes, return to real time, adjust the night and day thresholds with sliders, and score any sentence with the live scorer. While the clock is shifted, the header's status line adds 「演示时间 …」.
 
 All timings and thresholds live in `CalmCore/Sources/CalmCore/TimePolicy.swift`: night 23:00–6:00, threshold 0.5 at night and 0.7 by day (a score ≥ threshold settles), night settles until 9:00, day settles 15 minutes, 3 ritual pages at night and 1 by day, 5 s per ritual page, 1.5 s per melt-editor piece.
 
@@ -90,9 +92,9 @@ Not MultipeerConnectivity (deprecated; TN3151, TN3213). The plan is Network.fram
 
 ## Known issues
 
-- Delivered Chinese messages near one line long can be cut off with 「…」 in exyte's default bubble (seen with 「我真的好想你，我们复合好不好」). exyte decides whether the time fits on the same line by measuring the text with UIKit, which comes out slightly narrower than SwiftUI's rendering with full-width punctuation, and then applies `lineLimit(1)`. Suggested fix: draw delivered outgoing messages with our own solid bubble in `CalmMessageCell` instead of `params.defaultMessageView()`. M4 needs that anyway for the translucent-to-solid transition inside the bubble.
-- A message delivered after settling stays where it was written and keeps its original time; the scripted reply appears below it. This keeps the in-bubble transition possible.
-- Threshold slider changes and all chat state are lost when the app is killed (no persistence yet).
+- Fixed: delivered Chinese messages near one line long used to be cut off with 「…」 in exyte's default bubble (exyte measures text with UIKit, which comes out narrower than SwiftUI's rendering of full-width punctuation, and then applies `lineLimit(1)`). Outgoing messages now use our own `DeliveredBubble`.
+- A message delivered after settling stays where it was written, shows its delivery time, and turns from glass to solid in place (skipped with Reduce Motion); the scripted reply appears below it.
+- Threshold slider changes and all chat state are lost when the app is killed (no persistence yet; SwiftData is first in the cut list).
 - Local notifications use a time-interval trigger computed from the demo clock offset (real fire time = `settleUntil` − offset). Moving the clock reschedules them. Check on a device that the 「昨晚 1:47 的那条沉淀好了」 banner appears, including in the foreground.
 - Questions and scripted replies are draft copy for the non-tech teammates to replace in `App/Resources/*.json`. When a script runs out, the other side goes quiet.
 
@@ -107,7 +109,6 @@ Not MultipeerConnectivity (deprecated; TN3151, TN3213). The plan is Network.fram
 
 1. Sean: open on a Mac, set the team, run on the demo iPhone, and try the demo panel flow once.
 2. Ryan: deliver v0 as `App/Model/ImpulseClassifier.mlmodel` with the two labels; confirm in the demo panel that it shows Core ML and that the demo sentences score as expected.
-3. Own solid bubble for delivered outgoing messages (fixes the truncation, enables the M4 transition).
-4. SwiftData persistence of `CalmMessage` records and conversation messages so settling survives a restart (cut first if short on time).
-5. M4 polish and accessibility pass; replace draft copy; build the demo sentence list into a rehearsal script.
-6. Two-device transport only if Sean confirms, after M3.
+3. SwiftData persistence of `CalmMessage` records and conversation messages so settling survives a restart (cut first if short on time).
+4. M4 polish and accessibility pass; replace draft copy; build the demo sentence list into a rehearsal script.
+5. Two-device transport only if Sean confirms, after M3.

@@ -33,6 +33,9 @@ final class ChatStore: Identifiable {
     var route: Route?
     /// A short line shown over the chat after a rewrite is scored.
     var banner: String?
+    /// True while a reply from the other side is on its way; the header shows 「正在输入…」.
+    private(set) var peerIsTyping = false
+    private var repliesInFlight = 0
 
     private unowned let app: AppModel
     private let transport: any MessageTransport
@@ -125,7 +128,16 @@ final class ChatStore: Identifiable {
         switch new.state {
         case .delivered:
             app.notifications.cancel(id: new.id)
-            Task { await transport.send(WireMessage(id: new.id, text: new.text, sentAt: new.deliveredAt ?? app.now)) }
+            let wire = WireMessage(id: new.id, text: new.text, sentAt: new.deliveredAt ?? app.now)
+            Task { [weak self] in
+                guard let self else { return }
+                // ScriptedTransport.send returns after its reply is out, so this spans the "typing" delay.
+                self.repliesInFlight += 1
+                self.peerIsTyping = true
+                await self.transport.send(wire)
+                self.repliesInFlight -= 1
+                self.peerIsTyping = self.repliesInFlight > 0
+            }
         case .settling where old.state == .scoring:
             app.notifications.schedule(for: new, peerName: peer.name, clock: app.clock, policy: app.policy)
         case .dissolving:

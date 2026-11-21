@@ -2,16 +2,22 @@ import CalmCore
 import ExyteChat
 import SwiftUI
 
-/// The row for every message: held outgoing messages get the glass bubbles,
-/// everything else keeps exyte's default bubble.
+/// The row for every message. Outgoing messages (they all have a record) use our
+/// own bubbles; messages from the other side keep exyte's default bubble.
+///
+/// Delivered outgoing messages don't use exyte's bubble either: it measures text
+/// with UIKit, which comes out narrower than SwiftUI's rendering of full-width
+/// punctuation, so near-one-line Chinese messages were cut off with 「…」.
 struct CalmMessageCell: View {
     let params: MessageBuilderParameters
     let store: ChatStore
 
     var body: some View {
-        if let record = store.records[params.message.id], record.state != .delivered {
+        if let record = store.records[params.message.id] {
             Group {
                 switch record.state {
+                case .delivered:
+                    DeliveredBubble(record: record)
                 case .ready:
                     ReadyBubble(record: record)
                 case .dissolving, .dissolved:
@@ -28,6 +34,58 @@ struct CalmMessageCell: View {
         } else {
             params.defaultMessageView()
         }
+    }
+}
+
+/// A solid sent bubble. When a held message has just been delivered, it turns
+/// from translucent glass to solid inside the bubble.
+struct DeliveredBubble: View {
+    @Environment(AppModel.self) private var app
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.chatTheme) private var theme
+    let record: CalmMessage
+    @State private var solid = true
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 3) {
+            Text(record.text)
+                // .subheadline is 15 pt at the default size, like exyte's bubbles, and scales with Dynamic Type.
+                .font(.subheadline)
+                .foregroundStyle(solid ? AnyShapeStyle(theme.colors.messageMyText) : AnyShapeStyle(.primary.opacity(0.55)))
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 3) {
+                Text(time)
+                Image(systemName: "checkmark")
+            }
+            .font(.caption2)
+            .foregroundStyle(solid ? AnyShapeStyle(theme.colors.messageMyTimeText) : AnyShapeStyle(.secondary))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .background {
+            RoundedRectangle(cornerRadius: 18)
+                .fill(theme.colors.messageMyBG)
+                .opacity(solid ? 1 : 0)
+        }
+        .glassEffect(.regular.tint(.indigo.opacity(solid ? 0 : 0.18)), in: .rect(cornerRadius: 18))
+        .frame(maxWidth: 280, alignment: .trailing)
+        .onAppear(perform: animateIfJustDelivered)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("已送达：\(record.text)，\(time)")
+    }
+
+    private var time: String {
+        (record.deliveredAt ?? record.createdAt).formatted(date: .omitted, time: .shortened)
+    }
+
+    /// Only a message that was held and delivered moments ago animates, so rows
+    /// recreated while scrolling don't replay it.
+    private func animateIfJustDelivered() {
+        guard record.settleUntil != nil, let deliveredAt = record.deliveredAt,
+              app.now.timeIntervalSince(deliveredAt) < 1.5, !reduceMotion else { return }
+        solid = false
+        withAnimation(.easeInOut(duration: 1.2).delay(0.3)) { solid = true }
     }
 }
 
