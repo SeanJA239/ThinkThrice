@@ -4,6 +4,9 @@ import SwiftUI
 /// header avatar. Sent bubbles, the tint, avatars and charts all use it.
 enum Theme {
     static let brand = Color(red: 0.39, green: 0.33, blue: 0.93)
+    /// The brand violet for icons and text on glass: lighter in dark mode so it
+    /// stays readable, the way system colours brighten in dark mode.
+    static let brandOnGlass = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: 0.70, green: 0.66, blue: 1, alpha: 1) : UIColor(red: 0.39, green: 0.33, blue: 0.93, alpha: 1) })
     static let brandDeep = Color(red: 0.27, green: 0.20, blue: 0.75)
     static let gradient = LinearGradient(colors: [Color(red: 0.52, green: 0.43, blue: 1), brandDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
     /// Held messages and everything about freezing.

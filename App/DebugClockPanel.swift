@@ -28,7 +28,7 @@ struct DebugClockPanel: View {
                     Button("回到真实时间", role: .destructive) { app.resetClock() }
                 }
 
-                Section("锁定线（冲动指数 ≥ 锁定线就沉淀）") {
+                Section("锁定线（冲动指数 ≥ 锁定线就冷静）") {
                     LabeledContent("夜间 \(Int((app.policy.nightThreshold * 100).rounded()))") {
                         Slider(value: $app.policy.nightThreshold, in: 0...1, step: 0.05)
                     }
@@ -61,7 +61,7 @@ struct DebugClockPanel: View {
                                 dismiss()
                             }
                         } message: {
-                            Text("删除所有消息和沉淀状态，演示时钟和阈值也恢复默认。")
+                            Text("删除所有消息和冷静状态，演示时钟和阈值也恢复默认。")
                         }
                 } header: {
                     Text("彩排")
@@ -82,7 +82,7 @@ struct DebugClockPanel: View {
                         let verdict = app.judge.judge(probe, to: probeRecipient, lateNight: night)
                         LabeledContent("模型概率", value: app.judge.modelProbability(probe).formatted(.number.precision(.fractionLength(2))))
                         LabeledContent("冲动指数", value: "\(Int(verdict.score.rounded()))")
-                        LabeledContent("现在会", value: app.policy.shouldSettle(score: verdict.impulse, at: app.now) ? "沉淀" : "直接送达")
+                        LabeledContent("现在会", value: app.policy.shouldSettle(score: verdict.impulse, at: app.now) ? "冷静" : "直接送达")
                         LabeledContent("原因", value: verdict.reason.rawValue)
                         LabeledContent("命中规则", value: verdict.matched.isEmpty ? "无" : verdict.matched.joined(separator: "、"))
                     }

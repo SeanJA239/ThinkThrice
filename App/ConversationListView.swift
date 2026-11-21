@@ -48,13 +48,15 @@ struct ConversationListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { showProfile = true } label: {
-                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 40)
+                        InitialAvatar(name: profileName, image: InitialAvatar.me, size: 48)
+                            .padding(4)
+                            .glassEffect(.regular.interactive(), in: .circle)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("个人主页")
                 }
-                // The avatar is its own circle; the shared glass capsule around
-                // toolbar items made a second, misaligned outline.
+                // The avatar brings its own glass circle; the shared glass capsule
+                // around toolbar items made a second, misaligned outline.
                 .sharedBackgroundVisibility(.hidden)
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
@@ -85,6 +87,9 @@ private struct ConversationRow: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+            // Start the row separator under the name. Without this, List lines it
+            // up with the held badge's label and draws only a stub on the right.
+            .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 6) {
                 if let date = store.lastActivity {
@@ -99,7 +104,7 @@ private struct ConversationRow: View {
                         .padding(.horizontal, 7)
                         .padding(.vertical, 2)
                         .background(Theme.ice.gradient, in: .capsule)
-                        .accessibilityLabel("\(store.heldCount) 条沉淀中")
+                        .accessibilityLabel("\(store.heldCount) 条冷静中")
                 }
             }
         }

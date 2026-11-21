@@ -53,7 +53,7 @@ final class ChatStore: Identifiable {
             case .auto: "在线"
             case .calm: "冷静中"
             case .busy: "忙碌"
-            case .offline: "显示离线"
+            case .offline: "离线"
             }
         }
         /// The status light: green when online, like the dot on the chat header.
@@ -171,7 +171,7 @@ final class ChatStore: Identifiable {
 
     var lastMessagePreview: String {
         guard let last = messages.last else { return "" }
-        if let record = records[last.id], record.state.isHeld { return "沉淀中…" }
+        if let record = records[last.id], record.state.isHeld { return "冷静中…" }
         return last.text
     }
 
@@ -211,7 +211,7 @@ final class ChatStore: Identifiable {
             self.send(id, .rescored(score))
             switch self.records[id]?.state {
             case .delivered?: self.showBanner("改写后平静多了，已送达")
-            case .settling?, .ready?: self.showBanner("还是有点冲，继续沉淀")
+            case .settling?, .ready?: self.showBanner("还是有点冲，继续冷静")
             default: break
             }
         }

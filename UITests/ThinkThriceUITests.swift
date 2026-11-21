@@ -77,13 +77,13 @@ final class ThinkThriceUITests: XCTestCase {
 
         // Day: an impulsive message settles for about 15 minutes.
         send("你给我滚，我受够你了！")
-        let settling = element(beginningWith: "沉淀中的消息")
+        let settling = element(beginningWith: "冷静中的消息")
         XCTAssertTrue(settling.waitForExistence(timeout: 5))
         sleep(1)
         shot("02-settling-day")
 
         settling.tap()
-        XCTAssertTrue(app.staticTexts["这条消息正在沉淀"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["这条消息正在冷静"].waitForExistence(timeout: 3))
         shot("03-action-panel")
 
         // Rewrite: pieces appear one by one; cancel keeps the original.
@@ -95,13 +95,13 @@ final class ThinkThriceUITests: XCTestCase {
         app.buttons["取消"].tap()
         sleep(1)
 
-        // Ritual by day: one page, 5 s lock, then deliver.
-        element(beginningWith: "沉淀中的消息").tap()
+        // Ritual by day: one page, locked for three 5 s breaths, then deliver.
+        element(beginningWith: "冷静中的消息").tap()
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '现在就要发'")).firstMatch.tap()
         sleep(1)
         shot("06-ritual-locked")
         XCTAssertFalse(app.buttons["仍然发送"].isEnabled)
-        sleep(6)
+        sleep(16)
         XCTAssertTrue(app.buttons["仍然发送"].isEnabled)
         app.buttons["仍然发送"].tap()
         sleep(3)
@@ -114,7 +114,7 @@ final class ThinkThriceUITests: XCTestCase {
         shot("08-debug-panel")
         closeSheet()
         send("我真的好想你，我们复合好不好")
-        XCTAssertTrue(element(beginningWith: "沉淀中的消息").waitForExistence(timeout: 5))
+        XCTAssertTrue(element(beginningWith: "冷静中的消息").waitForExistence(timeout: 5))
         sleep(1)
         shot("09-settling-night")
 
@@ -123,20 +123,20 @@ final class ThinkThriceUITests: XCTestCase {
         app.launchEnvironment["THINKTHRICE_RESET"] = nil
         app.launch()
         app.staticTexts["前任"].firstMatch.tap()
-        XCTAssertTrue(element(beginningWith: "沉淀中的消息").waitForExistence(timeout: 5))
+        XCTAssertTrue(element(beginningWith: "冷静中的消息").waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '演示时间'")).firstMatch.exists)
         sleep(1)
         shot("09a-after-relaunch")
 
         // Night ritual has three pages; abandon on page one.
-        element(beginningWith: "沉淀中的消息").tap()
+        element(beginningWith: "冷静中的消息").tap()
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '当晚就要发'")).firstMatch.tap()
         sleep(1)
         XCTAssertTrue(app.staticTexts["第 1 / 3 题"].waitForExistence(timeout: 3))
         shot("10-ritual-night")
         app.buttons["算了"].tap()
         sleep(1)
-        XCTAssertTrue(element(beginningWith: "沉淀中的消息").exists)
+        XCTAssertTrue(element(beginningWith: "冷静中的消息").exists)
 
         // Morning: fast-forward to 9:00, the bubble becomes ready, confirm and send.
         openDebug()
@@ -145,7 +145,7 @@ final class ThinkThriceUITests: XCTestCase {
         closeSheet()
         sleep(2)
         shot("11-ready")
-        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '沉淀好了'")).firstMatch.tap()
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '冷静好了'")).firstMatch.tap()
         XCTAssertTrue(app.buttons["发送"].firstMatch.waitForExistence(timeout: 3))
         shot("12-confirm")
         app.buttons.matching(NSPredicate(format: "label == '发送'")).element(boundBy: 0).tap()
@@ -158,8 +158,8 @@ final class ThinkThriceUITests: XCTestCase {
 
         // Rewrite that calms down is delivered as a reward.
         send("你从来都不在乎我，我真是受够了！")
-        XCTAssertTrue(element(beginningWith: "沉淀中的消息").waitForExistence(timeout: 5))
-        element(beginningWith: "沉淀中的消息").tap()
+        XCTAssertTrue(element(beginningWith: "冷静中的消息").waitForExistence(timeout: 5))
+        element(beginningWith: "冷静中的消息").tap()
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '改写'")).firstMatch.tap()
         sleep(1)
         let editor = app.textViews.firstMatch
@@ -176,13 +176,13 @@ final class ThinkThriceUITests: XCTestCase {
 
         // Let go: zero friction, the bubble dissolves.
         send("你有病吧")
-        XCTAssertTrue(element(beginningWith: "沉淀中的消息").waitForExistence(timeout: 5))
-        element(beginningWith: "沉淀中的消息").tap()
+        XCTAssertTrue(element(beginningWith: "冷静中的消息").waitForExistence(timeout: 5))
+        element(beginningWith: "冷静中的消息").tap()
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '放下'")).firstMatch.tap()
         usleep(500_000)
         shot("16-dissolving")
         sleep(3)
-        XCTAssertFalse(element(beginningWith: "沉淀中的消息").exists)
+        XCTAssertFalse(element(beginningWith: "冷静中的消息").exists)
         shot("17-after-let-go")
     }
 
@@ -265,7 +265,7 @@ final class ThinkThriceUITests: XCTestCase {
         shot("44a-list-held-badge")
         app.staticTexts["前任"].firstMatch.tap()
         sleep(2)
-        element(beginningWith: "沉淀中的消息").tap()
+        element(beginningWith: "冷静中的消息").tap()
         sleep(2)
         shot("45-action-panel-reason")
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '改写'")).firstMatch.tap()
@@ -275,14 +275,14 @@ final class ThinkThriceUITests: XCTestCase {
         shot("47-melt-thawed")
         app.buttons["取消"].tap()
         sleep(1)
-        element(beginningWith: "沉淀中的消息").tap()
+        element(beginningWith: "冷静中的消息").tap()
         sleep(1)
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '当晚就要发'")).firstMatch.tap()
         usleep(1_200_000)
         shot("48-ritual-inhale")
         sleep(2)
         shot("49-ritual-exhale")
-        sleep(3)
+        sleep(13)
         shot("50-ritual-unlocked")
         app.buttons["算了"].tap()
         sleep(2)
@@ -292,7 +292,7 @@ final class ThinkThriceUITests: XCTestCase {
         closeSheet()
         sleep(3)
         shot("51-morning-ready")
-        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '沉淀好了'")).firstMatch.tap()
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '冷静好了'")).firstMatch.tap()
         sleep(2)
         app.buttons.matching(NSPredicate(format: "label == '发送'")).element(boundBy: 0).tap()
         usleep(600_000)
@@ -300,7 +300,7 @@ final class ThinkThriceUITests: XCTestCase {
         sleep(4)
         send("你有病吧，我受够了")
         sleep(3)
-        element(beginningWith: "沉淀中的消息").tap()
+        element(beginningWith: "冷静中的消息").tap()
         sleep(2)
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '放下'")).firstMatch.tap()
         usleep(500_000)
@@ -381,7 +381,7 @@ final class ThinkThriceUITests: XCTestCase {
         send("好吧我再想想")
         sleep(3)
         shot("67-cooling-held-snow")
-        app.buttons.matching(NSPredicate(format: "label BEGINSWITH '冷静中'")).firstMatch.tap()
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH '冷静中，'")).firstMatch.tap()
         sleep(1)
         app.buttons["结束冷静"].tap()
         sleep(3)
@@ -392,7 +392,7 @@ final class ThinkThriceUITests: XCTestCase {
         send("你根本不在乎我，我受够了")
         sleep(4)
         shot("69-night-snow")
-        element(beginningWith: "沉淀中的消息").tap()
+        element(beginningWith: "冷静中的消息").tap()
         sleep(1)
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH '当晚就要发'")).firstMatch.tap()
         usleep(1_400_000)

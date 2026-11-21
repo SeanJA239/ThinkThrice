@@ -94,7 +94,7 @@ extension ThinkStats {
         }
         let waited = this.count(.waitedSent), cooled = this.count(.cooled)
         if waited + cooled > 0 {
-            let parts = [waited > 0 ? "\(waited) 条消息等到沉淀好才发出" : nil, cooled > 0 ? "\(cooled) 次主动按下了暂停" : nil].compactMap { $0 }
+            let parts = [waited > 0 ? "\(waited) 条消息等冷静期过了才发出" : nil, cooled > 0 ? "\(cooled) 次主动按下了暂停" : nil].compactMap { $0 }
             out.append(ThinkInsight(kind: .tookTime, title: "你给了自己时间", detail: parts.joined(separator: "，") + "。"))
         }
         let ritual = this.count(.ritualSent)

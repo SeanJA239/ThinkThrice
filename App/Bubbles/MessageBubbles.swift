@@ -307,7 +307,7 @@ struct SettlingBubble: View {
             if record.state == .settling, app.now.timeIntervalSince(record.createdAt) < 1.2 { freeze() }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("沉淀中的消息：\(record.text)。\(countdown)")
+        .accessibilityLabel("冷静中的消息：\(record.text)。\(countdown)")
         .accessibilityHint("轻点选择怎么处理")
         .accessibilityAddTraits(.isButton)
     }
@@ -335,15 +335,15 @@ struct SettlingBubble: View {
     }
 
     private var countdown: String {
-        guard let until = record.settleUntil else { return "沉淀中" }
+        guard let until = record.settleUntil else { return "冷静中" }
         let remaining = max(0, until.timeIntervalSince(app.now))
         let hours = Int(remaining) / 3600
         let minutes = Int(remaining) % 3600 / 60
         let seconds = Int(remaining) % 60
         if hours > 0 {
-            return "沉淀中 · \(until.formatted(date: .omitted, time: .shortened)) 可发 · 还剩 \(hours) 小时 \(minutes) 分"
+            return "冷静中 · \(until.formatted(date: .omitted, time: .shortened)) 可发 · 还剩 \(hours) 小时 \(minutes) 分"
         }
-        return String(format: "沉淀中 · 还剩 %d:%02d", minutes, seconds)
+        return String(format: "冷静中 · 还剩 %d:%02d", minutes, seconds)
     }
 }
 
@@ -354,11 +354,11 @@ struct ReadyBubble: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
             FrozenShell(text: record.text, tint: .accentColor)
-            StatusLine(text: "沉淀好了 · 轻点确认", systemImage: "checkmark.seal", style: AnyShapeStyle(.tint))
+            StatusLine(text: "冷静好了 · 轻点确认", systemImage: "checkmark.seal", style: AnyShapeStyle(.tint))
         }
         .frame(maxWidth: 290, alignment: .trailing)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("沉淀好了的消息：\(record.text)")
+        .accessibilityLabel("冷静好了的消息：\(record.text)")
         .accessibilityHint("轻点确认是否发送")
         .accessibilityAddTraits(.isButton)
     }

@@ -30,7 +30,7 @@ struct RitualSheet: View {
                     .foregroundStyle(.secondary)
                 Spacer()
 
-                BreathingGuide(start: pageShownAt, wait: app.policy.ritualPageWait, unlocked: unlocked)
+                BreathingGuide(start: pageShownAt, breath: app.policy.ritualBreathDuration, unlocked: unlocked)
 
                 Button {
                     withAnimation { store.send(id, .ritualNext) }
@@ -67,13 +67,13 @@ struct RitualSheet: View {
     }
 }
 
-/// One slow breath per page, like the Apple Watch Breathe app: six translucent
-/// petals bloom outward and turn while breathing in, then fold back to a small
-/// bud while breathing out. 「下一题」 unlocks after the page's wait.
+/// Slow breaths like the Apple Watch Breathe app: six translucent petals bloom
+/// outward and turn while breathing in, then fold back to a small bud while
+/// breathing out. 「下一题」 unlocks after the page's three breaths.
 private struct BreathingGuide: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let start: Date
-    let wait: TimeInterval
+    let breath: TimeInterval
     let unlocked: Bool
 
     private static let petals = 6
@@ -81,8 +81,8 @@ private struct BreathingGuide: View {
     var body: some View {
         TimelineView(.animation(paused: reduceMotion)) { context in
             let t = context.date.timeIntervalSince(start)
-            // A full breath takes `wait` seconds: in for the first half, out for the second.
-            let phase = t.truncatingRemainder(dividingBy: wait) / wait
+            // A full breath takes `breath` seconds: in for the first half, out for the second.
+            let phase = t.truncatingRemainder(dividingBy: breath) / breath
             let breath = reduceMotion ? 1 : (1 - cos(phase * 2 * .pi)) / 2
             VStack(spacing: 18) {
                 ZStack {

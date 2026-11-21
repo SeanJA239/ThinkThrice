@@ -20,8 +20,12 @@ public struct TimePolicy: Sendable, Equatable {
     public var daySettleDuration: TimeInterval = 15 * 60
     public var nightRitualQuestions = 3
     public var dayRitualQuestions = 1
+    /// Slow breaths on each ritual page before "next" unlocks.
+    public var ritualBreaths = 3
+    /// Seconds per breath: in for the first half, out for the second.
+    public var ritualBreathDuration: TimeInterval = 5
     /// Seconds each ritual page stays before "next" unlocks.
-    public var ritualPageWait: TimeInterval = 5
+    public var ritualPageWait: TimeInterval { Double(ritualBreaths) * ritualBreathDuration }
     /// Seconds between sentences appearing in the melt editor.
     public var meltRevealInterval: TimeInterval = 1.5
     public var calendar: Calendar

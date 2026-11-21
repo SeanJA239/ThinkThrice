@@ -10,7 +10,7 @@ struct ActionPanel: View {
     var body: some View {
         let night = app.policy.isNight(app.now)
         VStack(alignment: .leading, spacing: 12) {
-            Text("这条消息正在沉淀")
+            Text("这条消息正在冷静")
                 .font(.title3.weight(.semibold))
             Text("对方还看不到它。你想怎么处理？")
                 .font(.subheadline)
@@ -25,7 +25,7 @@ struct ActionPanel: View {
                 store.send(id, .startRitual)
                 store.route = .ritual(id)
             }
-            exit(night ? "等到早上" : "等它沉淀完", detail: night ? "明早 9:00 提醒你再看一眼" : "大约 15 分钟后提醒你", icon: "moon.zzz") {
+            exit(night ? "等到早上" : "等它冷静下来", detail: night ? "明早 9:00 提醒你再看一眼" : "大约 15 分钟后提醒你", icon: "moon.zzz") {
                 store.route = nil
             }
             exit("改写", detail: "原文会一句一句浮现，改完重新判断", icon: "pencil.and.scribble") {

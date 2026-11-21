@@ -20,6 +20,7 @@ struct ContactPanel: View {
             content.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
         }
         .scrollBounceBehavior(.basedOnSize)
+        .tint(Theme.brandOnGlass)
         .frame(height: contentHeight > 0 ? min(contentHeight, maxHeight) : nil)
         .glassEffect(.regular, in: .rect(cornerRadius: 30))
         .shadow(color: .black.opacity(0.18), radius: 24, y: 10)
@@ -37,7 +38,7 @@ struct ContactPanel: View {
                 InitialAvatar(name: store.peer.name, image: InitialAvatar.image(for: store), size: 52)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(store.displayName).font(.title3.weight(.semibold))
-                    Text(store.note.isEmpty ? "沉淀中的消息 \(store.heldCount) 条" : store.peer.name)
+                    Text(store.note.isEmpty ? "冷静中的消息 \(store.heldCount) 条" : store.peer.name)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -136,7 +137,7 @@ struct ContactPanel: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .foregroundStyle(Theme.brand)
+        .foregroundStyle(Theme.brandOnGlass)
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 14))
         .accessibilityLabel(title)
     }

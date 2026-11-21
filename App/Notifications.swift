@@ -2,7 +2,7 @@ import CalmCore
 import Foundation
 import UserNotifications
 
-/// The "沉淀好了" local notification, one per held message, keyed by message id.
+/// The "冷静好了" local notification, one per held message, keyed by message id.
 ///
 /// Settle times are in demo-clock time, so each notification fires at the real
 /// equivalent (`settleUntil` minus the demo offset). After the demo clock jumps
@@ -38,14 +38,14 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
         center.removeDeliveredNotifications(withIdentifiers: [id])
     }
 
-    /// 「昨晚 1:47 的那条沉淀好了」 for night messages, 「14:05 的那条沉淀好了」 by day.
+    /// 「昨晚 1:47 的那条冷静好了」 for night messages, 「14:05 的那条冷静好了」 by day.
     static func body(for record: CalmMessage, policy: TimePolicy) -> String {
         let formatter = DateFormatter()
         formatter.calendar = policy.calendar
         formatter.timeZone = policy.calendar.timeZone
         formatter.dateFormat = "H:mm"
         let time = formatter.string(from: record.createdAt)
-        return policy.isNight(record.createdAt) ? "昨晚 \(time) 的那条沉淀好了" : "\(time) 的那条沉淀好了"
+        return policy.isNight(record.createdAt) ? "昨晚 \(time) 的那条冷静好了" : "\(time) 的那条冷静好了"
     }
 
     /// Asked at launch so the first held message can already notify.

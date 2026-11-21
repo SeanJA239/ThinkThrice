@@ -152,7 +152,7 @@ private struct ExitsCard: View {
         let rows: [(String, Int, Color)] = [
             ("放下", summary.count(.letGo), .green),
             ("改写后发出", summary.count(.rewroteCalm), .teal),
-            ("等它沉淀完", summary.count(.waitedSent), Theme.brand),
+            ("等它冷静下来", summary.count(.waitedSent), Theme.brand),
             ("走完仪式仍发出", summary.count(.ritualSent), .orange),
         ]
         let maxValue = max(1, rows.map(\.1).max() ?? 1)

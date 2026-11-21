@@ -49,7 +49,7 @@ struct ProfileView: View {
                             Text("编辑资料").frame(maxWidth: .infinity).padding(.vertical, 4)
                         }
                         .buttonStyle(.glassProminent)
-                        ShareLink(item: "我在用 ThinkThrice：发送之前，先想三遍。") {
+                        ShareLink(item: "我在用 ThinkThrice：发送之前，先想三遍。", preview: SharePreview("ThinkThrice", image: Image("logo"))) {
                             Image(systemName: "square.and.arrow.up").padding(.vertical, 4)
                         }
                         .buttonStyle(.glass)
@@ -109,16 +109,20 @@ struct ProfileView: View {
         .frame(maxWidth: .infinity)
     }
 
+    /// Tappable, with press feedback, but there is no badge detail page yet.
     private func badge(_ title: String, _ icon: String, earned: Bool) -> some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(earned ? AnyShapeStyle(Theme.gradient) : AnyShapeStyle(.tertiary))
-                .frame(width: 56, height: 56)
-                .glassEffect(.regular, in: .circle)
-            Text(title).font(.caption).foregroundStyle(earned ? .primary : .secondary)
+        Button { Haptics.tick() } label: {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundStyle(earned ? AnyShapeStyle(Theme.gradient) : AnyShapeStyle(.tertiary))
+                    .frame(width: 56, height: 56)
+                    .glassEffect(.regular.interactive(), in: .circle)
+                Text(title).font(.caption).foregroundStyle(earned ? .primary : .secondary)
+            }
+            .frame(width: 84)
         }
-        .frame(width: 84)
+        .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityValue(earned ? "已获得" : "未获得")
     }
