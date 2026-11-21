@@ -21,6 +21,20 @@
                ReferencedContainer = "container:ThinkThrice.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1BFDA81FB3C97F288264A350"
+               BuildableName = "ThinkThriceUITests.xctest"
+               BlueprintName = "ThinkThriceUITests"
+               ReferencedContainer = "container:ThinkThrice.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -39,6 +53,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1BFDA81FB3C97F288264A350"
+               BuildableName = "ThinkThriceUITests.xctest"
+               BlueprintName = "ThinkThriceUITests"
+               ReferencedContainer = "container:ThinkThrice.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

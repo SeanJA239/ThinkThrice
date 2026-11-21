@@ -18,6 +18,7 @@
 		38E2AE136CE102528C9B2BA7 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B58B8B9CADF74B0A748B58D /* ChatStore.swift */; };
 		40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */; };
 		56A2A619B5E17F5D42268471 /* InputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2067BB54D63FBA1776430549 /* InputBar.swift */; };
+		6135445B8155481067326FE1 /* ThinkThriceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B3EFA6DC20DDF7ACDA0AC8 /* ThinkThriceUITests.swift */; };
 		6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42564C269EC6E4B2B8034FA7 /* MeltEditor.swift */; };
 		72B496A17CCAA46CD071D60D /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C68C244D01951A51C3878E /* Haptics.swift */; };
 		757D79AD277E8621EC10D6AB /* P2PTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B882E3866ABA7704CA49F2E1 /* P2PTransport.swift */; };
@@ -40,6 +41,16 @@
 		FF34946B6DD966EEF9745D71 /* Archive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852CD84A07368DE69B5157A2 /* Archive.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		7E5B74AA298597B32A4C93E6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 973664A6E1A5C29C82CAE8C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55BE8C4D3A49B485B60744C9;
+			remoteInfo = ThinkThrice;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		056D9DEB9C6DDAB448F64D24 /* StatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStore.swift; sourceTree = "<group>"; };
 		1183279DB21C8FB67F1EBEA1 /* ThinkThriceAngerLite.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = ThinkThriceAngerLite.mlmodel; sourceTree = "<group>"; };
@@ -52,6 +63,7 @@
 		44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmSheet.swift; sourceTree = "<group>"; };
 		5B58B8B9CADF74B0A748B58D /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
 		61D4C506115F14561F38F7B6 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		65B3EFA6DC20DDF7ACDA0AC8 /* ThinkThriceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkThriceUITests.swift; sourceTree = "<group>"; };
 		67511739D8BAFD3E64DBDF29 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreen.swift; sourceTree = "<group>"; };
 		7125896DB7D652FFB70B6C42 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -70,6 +82,7 @@
 		C004345BA3473A92A23C028F /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		C38F3539674AF75839A10F82 /* CalmCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CalmCore; path = CalmCore; sourceTree = SOURCE_ROOT; };
 		CCB42A16EC1F61B273389275 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
+		CD63A1AD686E2BD42F8BC8D7 /* ThinkThriceUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ThinkThriceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD8D4BD3DE977D8775275059 /* RitualSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualSheet.swift; sourceTree = "<group>"; };
 		D473F42DE65A726A0AF5F894 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		DEB771C66A66B2EACD99309A /* ThinkThrice.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ThinkThrice.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				DEB771C66A66B2EACD99309A /* ThinkThrice.app */,
+				CD63A1AD686E2BD42F8BC8D7 /* ThinkThriceUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -143,6 +157,14 @@
 				BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */,
 			);
 			path = Bubbles;
+			sourceTree = "<group>";
+		};
+		644D3E6E046FF0CBB6207C5E /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				65B3EFA6DC20DDF7ACDA0AC8 /* ThinkThriceUITests.swift */,
+			);
+			path = UITests;
 			sourceTree = "<group>";
 		};
 		7DCA953E1D8AE2B682C8E0AB /* Sheets */ = {
@@ -169,6 +191,7 @@
 			children = (
 				0559A9FA46A84781F0887AA2 /* App */,
 				9172DFDACF09DD8059DC4E99 /* Packages */,
+				644D3E6E046FF0CBB6207C5E /* UITests */,
 				22D4527F13237C0CFD460B16 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -185,6 +208,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1BFDA81FB3C97F288264A350 /* ThinkThriceUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 55B00A321A44C3B6328ECCA6 /* Build configuration list for PBXNativeTarget "ThinkThriceUITests" */;
+			buildPhases = (
+				F5936BDBCB0BE9760482FACD /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				453B69EBC5377B113C4B52A0 /* PBXTargetDependency */,
+			);
+			name = ThinkThriceUITests;
+			packageProductDependencies = (
+			);
+			productName = ThinkThriceUITests;
+			productReference = CD63A1AD686E2BD42F8BC8D7 /* ThinkThriceUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		55BE8C4D3A49B485B60744C9 /* ThinkThrice */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DE43CB9949A5AEF4BDB6C706 /* Build configuration list for PBXNativeTarget "ThinkThrice" */;
@@ -215,6 +256,11 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					1BFDA81FB3C97F288264A350 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = 55BE8C4D3A49B485B60744C9;
+					};
 					55BE8C4D3A49B485B60744C9 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
@@ -240,6 +286,7 @@
 			projectRoot = "";
 			targets = (
 				55BE8C4D3A49B485B60744C9 /* ThinkThrice */,
+				1BFDA81FB3C97F288264A350 /* ThinkThriceUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -291,7 +338,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F5936BDBCB0BE9760482FACD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6135445B8155481067326FE1 /* ThinkThriceUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		453B69EBC5377B113C4B52A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55BE8C4D3A49B485B60744C9 /* ThinkThrice */;
+			targetProxy = 7E5B74AA298597B32A4C93E6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DAEA3B84DB7D9BF630F8D75 /* Debug */ = {
@@ -442,6 +505,46 @@
 			};
 			name = Release;
 		};
+		9C1C05E9259FE2C812D04A7A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinkthrice.ThinkThriceUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ThinkThrice;
+			};
+			name = Release;
+		};
+		B4CFE64FBEE276FEE1015811 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinkthrice.ThinkThriceUITests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ThinkThrice;
+			};
+			name = Debug;
+		};
 		E7A53632D8C0DC4E1D86D98F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -479,6 +582,15 @@
 			buildConfigurations = (
 				1DAEA3B84DB7D9BF630F8D75 /* Debug */,
 				5DACC7294D5384C1864A6C51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		55B00A321A44C3B6328ECCA6 /* Build configuration list for PBXNativeTarget "ThinkThriceUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4CFE64FBEE276FEE1015811 /* Debug */,
+				9C1C05E9259FE2C812D04A7A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
