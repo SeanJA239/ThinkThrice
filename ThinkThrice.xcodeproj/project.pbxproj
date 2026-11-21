@@ -17,6 +17,7 @@
 		40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */; };
 		56A2A619B5E17F5D42268471 /* InputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2067BB54D63FBA1776430549 /* InputBar.swift */; };
 		6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42564C269EC6E4B2B8034FA7 /* MeltEditor.swift */; };
+		757D79AD277E8621EC10D6AB /* P2PTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B882E3866ABA7704CA49F2E1 /* P2PTransport.swift */; };
 		8947E32BDDE840B4F0A93E03 /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152C9D1FC299ADF363C23AA6 /* Content.swift */; };
 		91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44AF83C7D43037FDE470FC02 /* ConfirmSheet.swift */; };
 		B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B066620A1EA312BB709DD32D /* ActionPanel.swift */; };
@@ -25,6 +26,7 @@
 		D7E0F71D3DCF8E47D7DE89D5 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 67AE1CE8C5E5ED1B956A2075 /* ExyteChat */; };
 		E7040887459B1A807DC6BB72 /* RitualSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD8D4BD3DE977D8775275059 /* RitualSheet.swift */; };
 		E76B83F6E3619328BDD1D439 /* Questions.json in Resources */ = {isa = PBXBuildFile; fileRef = 7902B4B9E729879CB13B948B /* Questions.json */; };
+		FF34946B6DD966EEF9745D71 /* Archive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852CD84A07368DE69B5157A2 /* Archive.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,9 +40,12 @@
 		61D4C506115F14561F38F7B6 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreen.swift; sourceTree = "<group>"; };
 		7902B4B9E729879CB13B948B /* Questions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Questions.json; sourceTree = "<group>"; };
+		852CD84A07368DE69B5157A2 /* Archive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Archive.swift; sourceTree = "<group>"; };
 		9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkThriceApp.swift; sourceTree = "<group>"; };
 		B066620A1EA312BB709DD32D /* ActionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPanel.swift; sourceTree = "<group>"; };
+		B882E3866ABA7704CA49F2E1 /* P2PTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = P2PTransport.swift; sourceTree = "<group>"; };
 		BB72AD3E8F19FA4058EBB2FF /* MessageBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbles.swift; sourceTree = "<group>"; };
+		BCBA65584E653E4CED9490CC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C004345BA3473A92A23C028F /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		C38F3539674AF75839A10F82 /* CalmCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CalmCore; path = CalmCore; sourceTree = SOURCE_ROOT; };
 		CCB42A16EC1F61B273389275 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
@@ -65,13 +70,16 @@
 			isa = PBXGroup;
 			children = (
 				61D4C506115F14561F38F7B6 /* AppModel.swift */,
+				852CD84A07368DE69B5157A2 /* Archive.swift */,
 				6A7314EF3EFB54A96F614CAB /* ChatScreen.swift */,
 				5B58B8B9CADF74B0A748B58D /* ChatStore.swift */,
 				152C9D1FC299ADF363C23AA6 /* Content.swift */,
 				CCB42A16EC1F61B273389275 /* ConversationListView.swift */,
 				32D326594331CC0E301BAE37 /* DebugClockPanel.swift */,
+				BCBA65584E653E4CED9490CC /* Info.plist */,
 				2067BB54D63FBA1776430549 /* InputBar.swift */,
 				C004345BA3473A92A23C028F /* Notifications.swift */,
+				B882E3866ABA7704CA49F2E1 /* P2PTransport.swift */,
 				9D754832983DFA28F3B571B4 /* ThinkThriceApp.swift */,
 				376E31CE649E2EC1F3790325 /* Bubbles */,
 				D0DC1D72680BCC866B8412C9 /* Resources */,
@@ -214,6 +222,7 @@
 			files = (
 				B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */,
 				1FB63148949A97BC0DA870A4 /* AppModel.swift in Sources */,
+				FF34946B6DD966EEF9745D71 /* Archive.swift in Sources */,
 				40BDAD6EBF193ED50AD5A372 /* ChatScreen.swift in Sources */,
 				38E2AE136CE102528C9B2BA7 /* ChatStore.swift in Sources */,
 				91583F8FAB9DC06669B71314 /* ConfirmSheet.swift in Sources */,
@@ -224,6 +233,7 @@
 				6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */,
 				23AFC753423360A0B03280DF /* MessageBubbles.swift in Sources */,
 				3715FC2A26A92A4D35433D24 /* Notifications.swift in Sources */,
+				757D79AD277E8621EC10D6AB /* P2PTransport.swift in Sources */,
 				E7040887459B1A807DC6BB72 /* RitualSheet.swift in Sources */,
 				161042CF6FA5E96699981C53 /* ThinkThriceApp.swift in Sources */,
 			);
@@ -304,6 +314,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ThinkThrice;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -387,6 +398,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ThinkThrice;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
