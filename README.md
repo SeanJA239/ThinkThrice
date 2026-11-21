@@ -12,4 +12,4 @@ Requires Xcode 26 or later and an iPhone on iOS 26 or later.
 
 Impulsive messages are detected on the phone by a Core ML model plus keyword rules (`App/Model/`, `CalmCore/Sources/CalmCore/ThinkThriceRules.swift`).
 
-See [docs/HANDOFF.md](docs/HANDOFF.md) for the current status, structure, the model contract and next steps.
+See [docs/HANDOFF.md](docs/HANDOFF.md) for the current status, structure, the model contract and next steps, and [docs/TEAM_SYNC.md](docs/TEAM_SYNC.md) (Chinese) for the team progress update, installing on teammates' iPhones and the demo checklist.
