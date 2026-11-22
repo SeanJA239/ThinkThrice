@@ -138,6 +138,7 @@ project.yml   XcodeGen spec for ThinkThrice.xcodeproj
 
 - **Sean Ja** ([@SeanJA239](https://github.com/SeanJA239)): iOS app, interaction design.
 - **睿洋 (Ryan)**: impulse detector model and keyword rules (`App/Model/`, `CalmCore/Sources/CalmCore/ThinkThriceRules.swift`).
+- **Christina Cao**, **Ruiqi Liu** and **Roman Yeh**.
 
 ## Limitations
 
