@@ -25,10 +25,10 @@ struct ContactPanel: View {
         .glassEffect(.regular, in: .rect(cornerRadius: 30))
         .shadow(color: .black.opacity(0.18), radius: 24, y: 10)
         .accessibilityIdentifier("contactPanel")
-        .alert("\(notAvailable ?? "")暂未开放", isPresented: Binding(get: { notAvailable != nil }, set: { if !$0 { notAvailable = nil } })) {
-            Button("好") {}
+        .alert(tr("\(notAvailable ?? "")暂未开放", "\(notAvailable ?? "") isn't available yet"), isPresented: Binding(get: { notAvailable != nil }, set: { if !$0 { notAvailable = nil } })) {
+            Button(tr("好", "OK")) {}
         } message: {
-            Text("演示版只做了界面。")
+            Text(tr("演示版只做了界面。", "Only the interface is built in this demo."))
         }
     }
 
@@ -38,7 +38,7 @@ struct ContactPanel: View {
                 InitialAvatar(name: store.peer.name, image: InitialAvatar.image(for: store), size: 52)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(store.displayName).font(.title3.weight(.semibold))
-                    Text(store.note.isEmpty ? "冷静中的消息 \(store.heldCount) 条" : store.peer.name)
+                    Text(store.note.isEmpty ? tr("冷静中的消息 \(store.heldCount) 条", "\(store.heldCount) \(store.heldCount == 1 ? "message" : "messages") cooling down") : store.conversation.localizedName)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -50,18 +50,18 @@ struct ContactPanel: View {
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
-                .accessibilityLabel("收起")
+                .accessibilityLabel(tr("收起", "Collapse"))
             }
 
             HStack(spacing: 10) {
-                action("电话", "phone.fill") { notAvailable = "电话" }
-                action("视频", "video.fill") { notAvailable = "视频通话" }
-                action("搜索", "magnifyingglass") { notAvailable = "搜索聊天记录" }
-                action(store.muted ? "已静音" : "静音", store.muted ? "bell.slash.fill" : "bell.fill") { store.muted.toggle() }
+                action(tr("电话", "Call"), "phone.fill") { notAvailable = tr("电话", "Call") }
+                action(tr("视频", "Video"), "video.fill") { notAvailable = tr("视频通话", "Video call") }
+                action(tr("搜索", "Search"), "magnifyingglass") { notAvailable = tr("搜索聊天记录", "Search chat") }
+                action(store.muted ? tr("已静音", "Muted") : tr("静音", "Mute"), store.muted ? "bell.slash.fill" : "bell.fill") { store.muted.toggle() }
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("我对 TA 显示").font(.footnote).foregroundStyle(.secondary)
+                Text(tr("我对 TA 显示", "They see me as")).font(.footnote).foregroundStyle(.secondary)
                 HStack(spacing: 6) {
                     ForEach(ChatStore.MyStatus.allCases) { status in
                         statusChip(status)
@@ -73,7 +73,7 @@ struct ContactPanel: View {
                 close()
                 if store.isCooling { store.endCooling() } else { store.startCooling() }
             } label: {
-                Label(store.isCooling ? "结束冷静" : "双方冷静 15 分钟", systemImage: "snowflake")
+                Label(store.isCooling ? tr("结束冷静", "End cooldown") : tr("双方冷静 15 分钟", "Both cool down 15 min"), systemImage: "snowflake")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity)
@@ -86,15 +86,15 @@ struct ContactPanel: View {
 
             VStack(spacing: 0) {
                 row {
-                    Text("备注")
-                    TextField(store.peer.name, text: $store.note)
+                    Text(tr("备注", "Nickname"))
+                    TextField(store.conversation.localizedName, text: $store.note)
                         .multilineTextAlignment(.trailing)
                         .submitLabel(.done)
                 }
                 Divider()
-                row { Toggle("消息免打扰", isOn: $store.muted) }
+                row { Toggle(tr("消息免打扰", "Mute notifications"), isOn: $store.muted) }
                 Divider()
-                row { Toggle("置顶聊天", isOn: $store.pinned) }
+                row { Toggle(tr("置顶聊天", "Pin chat"), isOn: $store.pinned) }
             }
             // iOS 26 switches already turn into Liquid Glass while dragged; the
             // group behind them is clear glass too, not a white block.

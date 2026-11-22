@@ -34,6 +34,7 @@
 		B7E3ED2CA150DA734232FC08 /* ActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B066620A1EA312BB709DD32D /* ActionPanel.swift */; };
 		BB67ABD7434F2FEACA01460E /* DebugClockPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32D326594331CC0E301BAE37 /* DebugClockPanel.swift */; };
 		C3BF10D689F7C12E066F53A6 /* HeldLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = C907B777D84735654A945498 /* HeldLiveActivity.swift */; };
+		C58AE2A1B37BF48AF7C33F66 /* Language.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF9251D6B97641FC9B6F03BD /* Language.swift */; };
 		CCF78EED5DF4F12B837D05E7 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67511739D8BAFD3E64DBDF29 /* ProfileView.swift */; };
 		CEA5C59903A524FD1300D4F9 /* LiveActivities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E674978651D1C8D8E8957611 /* LiveActivities.swift */; };
 		D0A17DBD3D189626EA111384 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C47ED5609D98AE97B29A281 /* Assets.xcassets */; };
@@ -116,6 +117,7 @@
 		D473F42DE65A726A0AF5F894 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		DD45C92D689176A1E940B3AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DEB771C66A66B2EACD99309A /* ThinkThrice.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ThinkThrice.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF9251D6B97641FC9B6F03BD /* Language.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Language.swift; sourceTree = "<group>"; };
 		E674978651D1C8D8E8957611 /* LiveActivities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -148,6 +150,7 @@
 				23C68C244D01951A51C3878E /* Haptics.swift */,
 				BCBA65584E653E4CED9490CC /* Info.plist */,
 				2067BB54D63FBA1776430549 /* InputBar.swift */,
+				DF9251D6B97641FC9B6F03BD /* Language.swift */,
 				E674978651D1C8D8E8957611 /* LiveActivities.swift */,
 				C004345BA3473A92A23C028F /* Notifications.swift */,
 				B882E3866ABA7704CA49F2E1 /* P2PTransport.swift */,
@@ -399,6 +402,7 @@
 				72B496A17CCAA46CD071D60D /* Haptics.swift in Sources */,
 				95E3B02DFCF1054808E4C293 /* HeldActivityAttributes.swift in Sources */,
 				56A2A619B5E17F5D42268471 /* InputBar.swift in Sources */,
+				C58AE2A1B37BF48AF7C33F66 /* Language.swift in Sources */,
 				CEA5C59903A524FD1300D4F9 /* LiveActivities.swift in Sources */,
 				6B77DB313A26B928A7EB3499 /* MeltEditor.swift in Sources */,
 				23AFC753423360A0B03280DF /* MessageBubbles.swift in Sources */,

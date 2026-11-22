@@ -23,21 +23,39 @@ final class AppModel {
     /// and until they are downloaded the main model gives no prediction (the
     /// judge falls back to the Lite model meanwhile). The app asks for them at
     /// launch, and the demo panel shows this before going on stage.
-    private(set) var embeddingStatus = "检查中…"
+    private(set) var embeddingState = EmbeddingState.checking
+
+    enum EmbeddingState {
+        case checking, unsupported, downloading, ready, failed
+        var label: String {
+            switch self {
+            case .checking: tr("检查中…", "Checking…")
+            case .unsupported: tr("系统不支持", "Not supported")
+            case .downloading: tr("下载中…", "Downloading…")
+            case .ready: tr("已就绪", "Ready")
+            case .failed: tr("未就绪，模型可能只靠规则", "Not ready, the model may fall back to rules")
+            }
+        }
+    }
+
+    /// 设置 → 语言 / Language. The root view rebuilds on change (see `ThinkThriceApp`).
+    var language = AppLanguage.current {
+        didSet { UserDefaults.standard.set(language.rawValue, forKey: AppLanguage.key) }
+    }
 
     private func prepareEmbeddingAssets() {
         guard let embedding = NLContextualEmbedding(language: .simplifiedChinese) else {
-            embeddingStatus = "系统不支持"
+            embeddingState = .unsupported
             return
         }
         guard !embedding.hasAvailableAssets else {
-            embeddingStatus = "已就绪"
+            embeddingState = .ready
             return
         }
-        embeddingStatus = "下载中…"
+        embeddingState = .downloading
         Task { [weak self] in
             let result = try? await embedding.requestAssets()
-            self?.embeddingStatus = result == .available ? "已就绪" : "未就绪，模型可能只靠规则"
+            self?.embeddingState = result == .available ? .ready : .failed
         }
     }
 
@@ -63,7 +81,7 @@ final class AppModel {
             heldUnlocked = true
             return true
         }
-        heldUnlocked = (try? await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "查看冷静中的消息")) ?? false
+        heldUnlocked = (try? await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: tr("查看冷静中的消息", "View messages that are cooling down"))) ?? false
         return heldUnlocked
     }
 
@@ -80,6 +98,7 @@ final class AppModel {
             DemoSettings.reset()
             DemoSettings.p2pRole = nil
             UserDefaults.standard.removeObject(forKey: Self.lockHeldKey)
+            UserDefaults.standard.removeObject(forKey: AppLanguage.key)
         }
         lockHeld = UserDefaults.standard.bool(forKey: Self.lockHeldKey)
         let classifier = ThinkThriceClassifier()
@@ -109,7 +128,7 @@ final class AppModel {
     }
 
     /// The two-phone conversation, listed after the scripted ones while a role is set.
-    static let nearbyConversation = Content.Conversation(id: "nearby", name: "附近的 TA", recipient: .other, seed: [], replies: [])
+    static let nearbyConversation = Content.Conversation(id: "nearby", name: "附近的 TA", nameEn: "Someone nearby", recipient: .other, seed: [], replies: [])
 
     /// nil: scripted conversations only. Otherwise this phone hosts or joins a
     /// two-phone conversation. Switching back to nil is the on-site fallback.

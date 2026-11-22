@@ -13,24 +13,24 @@ struct StatsView: View {
         let stats = app.stats.stats(calendar: app.policy.calendar)
         let weeks = stats.weeks(endingAt: app.now)
         let days = stats.daily(days: 14, endingAt: app.now)
-        let review = stats.review(endingAt: app.now)
+        let review = stats.review(endingAt: app.now, english: app.language == .en)
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
                     ReviewCard(review: review)
                     if !review.insights.isEmpty {
-                        SectionTitle("亮点")
+                        SectionTitle(tr("亮点", "Highlights"))
                         VStack(spacing: 10) {
                             ForEach(review.insights, id: \.kind) { InsightRow(insight: $0) }
                         }
                     }
-                    SectionTitle("数据")
+                    SectionTitle(tr("数据", "Data"))
                     ScoreCard(this: weeks.this, last: weeks.last)
                     tiles(this: weeks.this, last: weeks.last)
                     DailyChart(days: days)
                     ExitsCard(summary: weeks.this)
                     if app.stats.seededExample {
-                        Text("前 14 天是示例数据，方便演示；可以在「设置」里清除。")
+                        Text(tr("前 14 天是示例数据，方便演示；可以在「设置」里清除。", "The first 14 days are example data for the demo; clear them in Settings."))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -39,16 +39,16 @@ struct StatsView: View {
                 .padding(16)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("三思")
+            .navigationTitle(tr("三思", "ThinkThrice"))
         }
     }
 
     private func tiles(this: ThinkStats.Summary, last: ThinkStats.Summary) -> some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            StatTile(title: "被冻住", value: this.count(.held), last: last.count(.held), icon: "snowflake", fewerIsBetter: true)
-            StatTile(title: "改写", value: this.count(.rewroteCalm) + this.count(.rewroteStill), last: last.count(.rewroteCalm) + last.count(.rewroteStill), icon: "pencil.and.scribble")
-            StatTile(title: "放下", value: this.count(.letGo), last: last.count(.letGo), icon: "wind")
-            StatTile(title: "冷静 / 等到早上", value: this.count(.cooled) + this.count(.waitedSent), last: last.count(.cooled) + last.count(.waitedSent), icon: "moon.zzz")
+            StatTile(title: tr("被冻住", "Frozen"), value: this.count(.held), last: last.count(.held), icon: "snowflake", fewerIsBetter: true)
+            StatTile(title: tr("改写", "Rewrite"), value: this.count(.rewroteCalm) + this.count(.rewroteStill), last: last.count(.rewroteCalm) + last.count(.rewroteStill), icon: "pencil.and.scribble")
+            StatTile(title: tr("放下", "Let go"), value: this.count(.letGo), last: last.count(.letGo), icon: "wind")
+            StatTile(title: tr("冷静 / 等到早上", "Cooled / waited"), value: this.count(.cooled) + this.count(.waitedSent), last: last.count(.cooled) + last.count(.waitedSent), icon: "moon.zzz")
         }
     }
 }
@@ -69,16 +69,16 @@ private struct ScoreCard: View {
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
                     Text("\(this.score)").font(.system(size: 34, weight: .bold, design: .rounded))
-                    Text("三思指数").font(.caption2).foregroundStyle(.secondary)
+                    Text(tr("三思指数", "ThinkThrice score")).font(.caption2).foregroundStyle(.secondary)
                 }
             }
             .frame(width: 112, height: 112)
             VStack(alignment: .leading, spacing: 6) {
-                Text("本周").font(.subheadline).foregroundStyle(.secondary)
-                Label(delta >= 0 ? "比上周 +\(delta)" : "比上周 \(delta)", systemImage: delta >= 0 ? "arrow.up.right" : "arrow.down.right")
+                Text(tr("本周", "This week")).font(.subheadline).foregroundStyle(.secondary)
+                Label(delta >= 0 ? tr("比上周 +\(delta)", "+\(delta) vs last week") : tr("比上周 \(delta)", "\(delta) vs last week"), systemImage: delta >= 0 ? "arrow.up.right" : "arrow.down.right")
                     .font(.headline)
                     .foregroundStyle(delta >= 0 ? .green : .orange)
-                Text("放下、改写和等待越多，指数越高。")
+                Text(tr("放下、改写和等待越多，指数越高。", "Letting go, rewriting and waiting raise the score."))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -105,7 +105,7 @@ private struct StatTile: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text("\(value)").font(.system(size: 28, weight: .semibold, design: .rounded))
-            Text(value == last ? "和上周一样" : "上周 \(last)")
+            Text(value == last ? tr("和上周一样", "Same as last week") : tr("上周 \(last)", "Last week \(last)"))
                 .font(.caption)
                 .foregroundStyle(value == last ? AnyShapeStyle(.secondary) : better ? AnyShapeStyle(.green) : AnyShapeStyle(.orange))
         }
@@ -121,17 +121,21 @@ private struct DailyChart: View {
     let days: [(day: Date, summary: ThinkStats.Summary)]
 
     var body: some View {
+        // Read each label once: Charts traps if a bar's category isn't in the
+        // colour scale, which happened when the two read the language at different moments.
+        let sent = tr("直接发出", "Sent directly"), frozen = tr("被冻住", "Frozen")
+        let date = tr("日期", "Date"), count = tr("条数", "Messages"), kind = tr("类型", "Type")
         VStack(alignment: .leading, spacing: 10) {
-            Text("最近 14 天").font(.headline)
+            Text(tr("最近 14 天", "Last 14 days")).font(.headline)
             Chart {
                 ForEach(days, id: \.day) { day in
-                    BarMark(x: .value("日期", day.day, unit: .day), y: .value("条数", day.summary.count(.sentDirectly)))
-                        .foregroundStyle(by: .value("类型", "直接发出"))
-                    BarMark(x: .value("日期", day.day, unit: .day), y: .value("条数", day.summary.count(.held)))
-                        .foregroundStyle(by: .value("类型", "被冻住"))
+                    BarMark(x: .value(date, day.day, unit: .day), y: .value(count, day.summary.count(.sentDirectly)))
+                        .foregroundStyle(by: .value(kind, sent))
+                    BarMark(x: .value(date, day.day, unit: .day), y: .value(count, day.summary.count(.held)))
+                        .foregroundStyle(by: .value(kind, frozen))
                 }
             }
-            .chartForegroundStyleScale(["直接发出": Theme.brand.opacity(0.35), "被冻住": Theme.ice])
+            .chartForegroundStyleScale([sent: Theme.brand.opacity(0.35), frozen: Theme.ice])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day, count: 3)) { _ in
                     AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
@@ -150,14 +154,14 @@ private struct ExitsCard: View {
 
     var body: some View {
         let rows: [(String, Int, Color)] = [
-            ("放下", summary.count(.letGo), .green),
-            ("改写后发出", summary.count(.rewroteCalm), .teal),
-            ("等它冷静下来", summary.count(.waitedSent), Theme.brand),
-            ("走完仪式仍发出", summary.count(.ritualSent), .orange),
+            (tr("放下", "Let go"), summary.count(.letGo), .green),
+            (tr("改写后发出", "Rewritten and sent"), summary.count(.rewroteCalm), .teal),
+            (tr("等它冷静下来", "Let it cool down"), summary.count(.waitedSent), Theme.brand),
+            (tr("走完仪式仍发出", "Sent after the ritual"), summary.count(.ritualSent), .orange),
         ]
         let maxValue = max(1, rows.map(\.1).max() ?? 1)
         VStack(alignment: .leading, spacing: 12) {
-            Text("被冻住之后").font(.headline)
+            Text(tr("被冻住之后", "After freezing")).font(.headline)
             ForEach(rows, id: \.0) { title, value, color in
                 HStack(spacing: 10) {
                     Text(title).font(.subheadline).frame(width: 104, alignment: .leading)
@@ -169,7 +173,7 @@ private struct ExitsCard: View {
                     Text("\(value)").font(.subheadline.monospacedDigit()).frame(width: 28, alignment: .trailing)
                 }
             }
-            Text("放下和改写越多，说明越会给自己留余地。")
+            Text(tr("放下和改写越多，说明越会给自己留余地。", "The more you let go and rewrite, the more room you give yourself."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -184,7 +188,7 @@ private struct ReviewCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("本周回顾", systemImage: "sparkles")
+            Label(tr("本周回顾", "Weekly review"), systemImage: "sparkles")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.8))
             Text(review.headline)

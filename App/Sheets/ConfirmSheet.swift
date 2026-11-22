@@ -9,7 +9,7 @@ struct ConfirmSheet: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text(app.content.questions.morning)
+            Text(app.content.questions.localized.morning)
                 .font(.title3.weight(.semibold))
                 .multilineTextAlignment(.center)
                 .padding(.top, 8)
@@ -28,17 +28,17 @@ struct ConfirmSheet: View {
                 store.send(id, .confirmSend)
                 store.route = nil
             } label: {
-                Text("发送").frame(maxWidth: .infinity).padding(.vertical, 6)
+                Text(tr("发送", "Send")).frame(maxWidth: .infinity).padding(.vertical, 6)
             }
             .buttonStyle(.glassProminent)
 
             HStack {
-                Button("再等等") {
+                Button(tr("再等等", "Wait more")) {
                     store.send(id, .confirmCancel)
                     store.route = nil
                 }
                 Spacer()
-                Button("放下") {
+                Button(tr("放下", "Let go")) {
                     store.send(id, .letGo)
                     store.route = nil
                 }

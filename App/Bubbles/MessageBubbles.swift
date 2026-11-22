@@ -154,15 +154,15 @@ struct DeliveredBubble: View {
                 }
                 .glassEffect(.regular.tint(.cyan.opacity(solid ? 0 : 0.2)), in: BubbleShape(isMe: true, hasTail: hasTail))
             if showsStatus {
-                StatusLine(emphasis: "已送达", text: time)
+                StatusLine(emphasis: tr("已送达", "Delivered"), text: time)
                     .transition(.opacity)
             }
         }
         .frame(maxWidth: 290, alignment: .trailing)
         .onAppear(perform: animateIfJustDelivered)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("我：\(record.text)")
-        .accessibilityValue(showsStatus ? "已送达 \(time)" : "")
+        .accessibilityLabel(tr("我：\(record.text)", "Me: \(record.text)"))
+        .accessibilityValue(showsStatus ? tr("已送达 \(time)", "Delivered \(time)") : "")
     }
 
     private var time: String {
@@ -315,10 +315,13 @@ struct SettlingBubble: View {
             if record.state == .settling, app.now.timeIntervalSince(record.createdAt) < 1.2 { freeze() }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("冷静中的消息：\(app.hidesHeld ? "已隐藏" : record.text)。\(countdown)")
-        .accessibilityHint(app.hidesHeld ? "轻点用 Face ID 查看" : "轻点选择怎么处理")
+        .accessibilityLabel(tr("冷静中的消息：\(spokenText)。\(countdown)", "Cooling message: \(spokenText). \(countdown)"))
+        .accessibilityHint(app.hidesHeld ? tr("轻点用 Face ID 查看", "Tap to view with Face ID") : tr("轻点选择怎么处理", "Tap to choose what to do"))
         .accessibilityAddTraits(.isButton)
     }
+
+    /// What VoiceOver reads: the text, or 「已隐藏」 while Face ID hides it.
+    private var spokenText: String { app.hidesHeld ? tr("已隐藏", "hidden") : record.text }
 
     private func freeze() {
         guard !reduceMotion else {
@@ -343,15 +346,15 @@ struct SettlingBubble: View {
     }
 
     private var countdown: String {
-        guard let until = record.settleUntil else { return "冷静中" }
+        guard let until = record.settleUntil else { return tr("冷静中", "Cooling down") }
         let remaining = max(0, until.timeIntervalSince(app.now))
         let hours = Int(remaining) / 3600
         let minutes = Int(remaining) % 3600 / 60
         let seconds = Int(remaining) % 60
         if hours > 0 {
-            return "冷静中 · \(until.formatted(date: .omitted, time: .shortened)) 可发 · 还剩 \(hours) 小时 \(minutes) 分"
+            return tr("冷静中 · \(until.formatted(date: .omitted, time: .shortened)) 可发 · 还剩 \(hours) 小时 \(minutes) 分", "Cooling · sendable at \(until.formatted(date: .omitted, time: .shortened)) · \(hours) h \(minutes) min left")
         }
-        return String(format: "冷静中 · 还剩 %d:%02d", minutes, seconds)
+        return String(format: tr("冷静中 · 还剩 %d:%02d", "Cooling · %d:%02d left"), minutes, seconds)
     }
 }
 
@@ -363,14 +366,16 @@ struct ReadyBubble: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 5) {
             FrozenShell(text: record.text, tint: .accentColor, hidden: app.hidesHeld)
-            StatusLine(text: "冷静好了 · 轻点确认", systemImage: "checkmark.seal", style: AnyShapeStyle(.tint))
+            StatusLine(text: tr("冷静好了 · 轻点确认", "Cooled down · tap to confirm"), systemImage: "checkmark.seal", style: AnyShapeStyle(.tint))
         }
         .frame(maxWidth: 290, alignment: .trailing)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("冷静好了的消息：\(app.hidesHeld ? "已隐藏" : record.text)")
-        .accessibilityHint(app.hidesHeld ? "轻点用 Face ID 查看" : "轻点确认是否发送")
+        .accessibilityLabel(tr("冷静好了的消息：\(spokenText)", "Cooled-down message: \(spokenText)"))
+        .accessibilityHint(app.hidesHeld ? tr("轻点用 Face ID 查看", "Tap to view with Face ID") : tr("轻点确认是否发送", "Tap to decide whether to send"))
         .accessibilityAddTraits(.isButton)
     }
+
+    private var spokenText: String { app.hidesHeld ? tr("已隐藏", "hidden") : record.text }
 }
 
 /// Letting go: the frozen bubble breaks into specks of ice that drift up and away.

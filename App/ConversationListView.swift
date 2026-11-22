@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ConversationListView: View {
     @Environment(AppModel.self) private var app
-    @AppStorage("profileName") private var profileName = "我"
+    @AppStorage("profileName") private var profileName = tr("我", "Me")
     @State private var showProfile = false
     @State private var query = ""
 
@@ -36,14 +36,14 @@ struct ConversationListView: View {
                     }
                 } footer: {
                     if stores.isEmpty, !query.isEmpty {
-                        Text("没有找到「\(query)」")
+                        Text(tr("没有找到「\(query)」", "No results for \"\(query)\""))
                             .frame(maxWidth: .infinity)
                             .padding(.top, 24)
                     }
                 }
             }
             .listSectionSpacing(12)
-            .navigationTitle("聊天")
+            .navigationTitle(tr("聊天", "Chats"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -53,7 +53,7 @@ struct ConversationListView: View {
                             .glassEffect(.regular.interactive(), in: .circle)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("个人主页")
+                    .accessibilityLabel(tr("个人主页", "Profile"))
                 }
                 // The avatar brings its own glass circle; the shared glass capsule
                 // around toolbar items made a second, misaligned outline.
@@ -82,7 +82,7 @@ private struct ConversationRow: View {
                         Image(systemName: "pin.fill").font(.caption).foregroundStyle(.secondary)
                     }
                 }
-                Text(store.isCooling ? "双方冷静中…" : store.lastMessagePreview)
+                Text(store.isCooling ? tr("双方冷静中…", "Both cooling down…") : store.lastMessagePreview)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -104,7 +104,7 @@ private struct ConversationRow: View {
                         .padding(.horizontal, 7)
                         .padding(.vertical, 2)
                         .background(Theme.ice.gradient, in: .capsule)
-                        .accessibilityLabel("\(store.heldCount) 条冷静中")
+                        .accessibilityLabel(tr("\(store.heldCount) 条冷静中", "\(store.heldCount) cooling down"))
                 }
             }
         }
@@ -120,7 +120,7 @@ private struct SearchField: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-            TextField("搜索联系人", text: $text)
+            TextField(tr("搜索联系人", "Search contacts"), text: $text)
                 .focused($focused)
                 .submitLabel(.search)
                 .accessibilityIdentifier("contactSearch")
@@ -131,7 +131,7 @@ private struct SearchField: View {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("清除")
+                .accessibilityLabel(tr("清除", "Clear"))
             }
         }
         .padding(.horizontal, 14)

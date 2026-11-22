@@ -6,8 +6,8 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("profileName") private var profileName = "我"
-    @AppStorage("profileBio") private var bio = "说话之前，先想三遍。"
+    @AppStorage("profileName") private var profileName = tr("我", "Me")
+    @AppStorage("profileBio") private var bio = tr("说话之前，先想三遍。", "Think three times before you speak.")
     @AppStorage("globalStatus") private var globalStatus = ChatStore.MyStatus.auto.rawValue
     @State private var editing = false
 
@@ -35,48 +35,48 @@ struct ProfileView: View {
                     .padding(.top, 8)
 
                     HStack(spacing: 0) {
-                        number("\(week.score)", "三思指数")
+                        number("\(week.score)", tr("三思指数", "ThinkThrice score"))
                         Divider().frame(height: 32)
-                        number("\(week.count(.letGo))", "本周放下")
+                        number("\(week.count(.letGo))", tr("本周放下", "Let go this week"))
                         Divider().frame(height: 32)
-                        number("\(week.count(.cooled))", "主动冷静")
+                        number("\(week.count(.cooled))", tr("主动冷静", "Cooldowns"))
                     }
                     .padding(.vertical, 14)
                     .background(.background.secondary, in: .rect(cornerRadius: 18))
 
                     HStack(spacing: 10) {
                         Button { editing = true } label: {
-                            Text("编辑资料").frame(maxWidth: .infinity).padding(.vertical, 4)
+                            Text(tr("编辑资料", "Edit profile")).frame(maxWidth: .infinity).padding(.vertical, 4)
                         }
                         .buttonStyle(.glassProminent)
-                        ShareLink(item: "我在用 ThinkThrice：发送之前，先想三遍。", preview: SharePreview("ThinkThrice", image: Image("logo"))) {
+                        ShareLink(item: tr("我在用 ThinkThrice：发送之前，先想三遍。", "I use ThinkThrice: think three times before you send."), preview: SharePreview("ThinkThrice", image: Image("logo"))) {
                             Image(systemName: "square.and.arrow.up").padding(.vertical, 4)
                         }
                         .buttonStyle(.glass)
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("我的状态").font(.headline)
-                        Picker("我的状态", selection: $globalStatus) {
+                        Text(tr("我的状态", "My status")).font(.headline)
+                        Picker(tr("我的状态", "My status"), selection: $globalStatus) {
                             ForEach(ChatStore.MyStatus.allCases) { s in
                                 Text(s.label).tag(s.rawValue)
                             }
                         }
                         .pickerStyle(.segmented)
-                        Text("对所有人显示；在某个聊天里也可以单独设置。")
+                        Text(tr("对所有人显示；在某个聊天里也可以单独设置。", "Shown to everyone; you can also set it per chat."))
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("成就").font(.headline)
+                        Text(tr("成就", "Badges")).font(.headline)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
-                                badge("第一次放下", "wind", earned: week.count(.letGo) > 0)
-                                badge("改写高手", "pencil.and.scribble", earned: week.count(.rewroteCalm) >= 3)
-                                badge("深夜不发", "moon.stars.fill", earned: week.count(.waitedSent) > 0)
-                                badge("主动冷静", "snowflake", earned: week.count(.cooled) > 0)
+                                badge(tr("第一次放下", "First let-go"), "wind", earned: week.count(.letGo) > 0)
+                                badge(tr("改写高手", "Rewriter"), "pencil.and.scribble", earned: week.count(.rewroteCalm) >= 3)
+                                badge(tr("深夜不发", "Slept on it"), "moon.stars.fill", earned: week.count(.waitedSent) > 0)
+                                badge(tr("主动冷静", "Cooldowns"), "snowflake", earned: week.count(.cooled) > 0)
                             }
                         }
                     }
@@ -84,17 +84,17 @@ struct ProfileView: View {
                 }
                 .padding(20)
             }
-            .navigationTitle("个人主页")
+            .navigationTitle(tr("个人主页", "Profile"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") { dismiss() }
+                    Button(tr("完成", "Done")) { dismiss() }
                 }
             }
-            .alert("编辑资料", isPresented: $editing) {
-                TextField("名字", text: $profileName)
-                TextField("签名", text: $bio)
-                Button("好") {}
+            .alert(tr("编辑资料", "Edit profile"), isPresented: $editing) {
+                TextField(tr("名字", "Name"), text: $profileName)
+                TextField(tr("签名", "Bio"), text: $bio)
+                Button(tr("好", "OK")) {}
             }
         }
     }
@@ -124,6 +124,6 @@ struct ProfileView: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
-        .accessibilityValue(earned ? "已获得" : "未获得")
+        .accessibilityValue(earned ? tr("已获得", "Earned") : tr("未获得", "Not earned yet"))
     }
 }

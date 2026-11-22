@@ -50,10 +50,10 @@ final class ChatStore: Identifiable {
         var id: String { rawValue }
         var label: String {
             switch self {
-            case .auto: "在线"
-            case .calm: "冷静中"
-            case .busy: "忙碌"
-            case .offline: "离线"
+            case .auto: tr("在线", "Online")
+            case .calm: tr("冷静中", "Cooling down")
+            case .busy: tr("忙碌", "Busy")
+            case .offline: tr("离线", "Offline")
             }
         }
         /// The status light: green when online, like the dot on the chat header.
@@ -80,7 +80,7 @@ final class ChatStore: Identifiable {
     var pinned = false { didSet { save() } }
 
     /// The name shown everywhere: the note if one is set.
-    var displayName: String { note.isEmpty ? peer.name : note }
+    var displayName: String { note.isEmpty ? conversation.localizedName : note }
 
     /// The cooling pause: until then, my new messages are held and the other
     /// side's replies wait, so both sides stop for a while.
@@ -171,7 +171,7 @@ final class ChatStore: Identifiable {
 
     var lastMessagePreview: String {
         guard let last = messages.last else { return "" }
-        if let record = records[last.id], record.state.isHeld { return "冷静中…" }
+        if let record = records[last.id], record.state.isHeld { return tr("冷静中…", "Cooling down…") }
         return last.text
     }
 
@@ -210,8 +210,8 @@ final class ChatStore: Identifiable {
             guard let self else { return }
             self.send(id, .rescored(score))
             switch self.records[id]?.state {
-            case .delivered?: self.showBanner("改写后平静多了，已送达")
-            case .settling?, .ready?: self.showBanner("还是有点冲，继续冷静")
+            case .delivered?: self.showBanner(tr("改写后平静多了，已送达", "Calmer after the rewrite, delivered"))
+            case .settling?, .ready?: self.showBanner(tr("还是有点冲，继续冷静", "Still a bit heated, cooling continues"))
             default: break
             }
         }
@@ -232,7 +232,7 @@ final class ChatStore: Identifiable {
         myStatus = .calm
         app.stats.record(.cooled, at: app.now)
         Haptics.freeze()
-        showBanner("双方冷静 15 分钟，\(until.formatted(date: .omitted, time: .shortened)) 再继续")
+        showBanner(tr("双方冷静 15 分钟，\(until.formatted(date: .omitted, time: .shortened)) 再继续", "Both cooling for 15 minutes, back at \(until.formatted(date: .omitted, time: .shortened))"))
         save()
     }
 
@@ -248,7 +248,7 @@ final class ChatStore: Identifiable {
         for (id, record) in records where record.state == .settling && record.lastScore == nil {
             send(id, .tick)
         }
-        showBanner("冷静结束")
+        showBanner(tr("冷静结束", "Cooldown over"))
         save()
     }
 
@@ -272,7 +272,7 @@ final class ChatStore: Identifiable {
 
     func rescheduleNotifications() {
         for record in records.values where record.state.isHeld && record.state != .dissolving {
-            app.notifications.schedule(for: record, peerName: peer.name, clock: app.clock, policy: app.policy)
+            app.notifications.schedule(for: record, peerName: displayName, clock: app.clock, policy: app.policy)
         }
     }
 
@@ -296,7 +296,7 @@ final class ChatStore: Identifiable {
             }
         case .settling where old.state == .scoring:
             Haptics.freeze()
-            app.notifications.schedule(for: new, peerName: peer.name, clock: app.clock, policy: app.policy)
+            app.notifications.schedule(for: new, peerName: displayName, clock: app.clock, policy: app.policy)
         case .settling where old.state == .rescoring, .ready where old.state == .rescoring:
             Haptics.freeze()
         case .dissolving:

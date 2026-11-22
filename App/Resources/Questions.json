@@ -7,5 +7,16 @@
   "day": [
     "你发这条消息，最希望对方做什么？"
   ],
-  "morning": "睡了一觉，你还想把它原样发出去吗？"
+  "morning": "睡了一觉，你还想把它原样发出去吗？",
+  "en": {
+    "night": [
+      "What do you most want them to do when they read this?",
+      "Would anything change if they only saw it tomorrow morning?",
+      "Three months from now, how do you think you'll feel about this message?"
+    ],
+    "day": [
+      "What do you most want them to do when they read this?"
+    ],
+    "morning": "After a night's sleep, do you still want to send it as it is?"
+  }
 }

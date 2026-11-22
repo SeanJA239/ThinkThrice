@@ -10,8 +10,23 @@ struct Content {
         let day: [String]
         /// The one light question when a settled message is ready.
         let morning: String
+        /// The same questions in English, shown when the app is in English.
+        var en: English?
+
+        struct English: Decodable {
+            let night: [String]
+            let day: [String]
+            let morning: String
+        }
+
+        /// The questions in the app's current language.
+        var localized: Questions {
+            guard AppLanguage.current == .en, let en else { return self }
+            return Questions(night: en.night, day: en.day, morning: en.morning)
+        }
 
         func ritual(total: Int) -> [String] {
+            let night = localized.night, day = localized.day
             let pages = total <= day.count ? day : night
             return (0..<total).map { pages.isEmpty ? "" : pages[$0 % pages.count] }
         }
@@ -20,12 +35,16 @@ struct Content {
     struct Conversation: Decodable, Identifiable {
         let id: String
         let name: String
+        /// The name shown when the app is in English.
+        var nameEn: String?
         /// Who the other side is for the detector: `ex`, `boss` or `other`.
         let recipient: Recipient
         /// Messages from the other side already in the chat when the app opens.
         let seed: [String]
         /// Replies, one per message the user gets delivered.
         let replies: [String]
+
+        var localizedName: String { tr(name, nameEn ?? name) }
     }
 
     struct Scripts: Decodable {

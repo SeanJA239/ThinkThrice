@@ -54,12 +54,16 @@ final class LiveActivities {
             states[store.id] = state
             let becameReady = state.readyAt == nil && old?.readyAt != nil
             let alert = becameReady
-                ? AlertConfiguration(title: "冷静好了", body: "给\(store.displayName)的消息可以再看一眼了", sound: .default)
+                ? AlertConfiguration(
+                    title: LocalizedStringResource(stringLiteral: tr("冷静好了", "Cooled down")),
+                    body: LocalizedStringResource(stringLiteral: tr("给\(store.displayName)的消息可以再看一眼了", "Your message to \(store.displayName) is ready for another look")),
+                    sound: .default
+                )
                 : nil
             Task.detached { await activity(id)?.update(content, alertConfiguration: alert) }
         } else {
             guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-            let attributes = HeldActivityAttributes(conversationID: store.id, peerName: store.displayName)
+            let attributes = HeldActivityAttributes(conversationID: store.id, peerName: store.displayName, english: AppLanguage.current == .en)
             guard let started = try? Activity.request(attributes: attributes, content: content) else { return }
             activityIDs[store.id] = started.id
             states[store.id] = state

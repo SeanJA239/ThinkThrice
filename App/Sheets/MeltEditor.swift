@@ -20,7 +20,7 @@ struct MeltEditor: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text("原文冻住了，正在一句句化开；你只能改已经化开的部分。")
+                Text(tr("原文冻住了，正在一句句化开；你只能改已经化开的部分。", "The original is frozen and thaws one sentence at a time; you can only edit what has thawed."))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -55,26 +55,26 @@ struct MeltEditor: View {
                     }
                     .allowsHitTesting(false)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("还有 \(pieces.count - revealed) 句冻着，会一句句化开")
+                    .accessibilityLabel(tr("还有 \(pieces.count - revealed) 句冻着，会一句句化开", "\(pieces.count - revealed) sentences still frozen, thawing one by one"))
                 }
                 Spacer()
             }
             .padding(20)
-            .navigationTitle("改写")
+            .navigationTitle(tr("改写", "Rewrite"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
+                    Button(tr("取消", "Cancel")) {
                         store.send(id, .cancelRewrite)
                         store.route = nil
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("重新判断") { submit() }
+                    Button(tr("重新判断", "Judge again")) { submit() }
                         .disabled(edited.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || submitted)
                 }
                 ToolbarItem(placement: .bottomBar) {
-                    Button("放下") {
+                    Button(tr("放下", "Let go")) {
                         store.send(id, .letGo)
                         store.route = nil
                     }

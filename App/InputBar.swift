@@ -5,7 +5,7 @@ import SwiftUI
 /// field and calls the `didSendMessage` closure where the message is scored.
 struct InputBar: View {
     let params: InputViewBuilderParameters
-    var placeholder = "写点什么…"
+    var placeholder = tr("写点什么…", "Write something…")
 
     private var isEmpty: Bool {
         params.text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -30,7 +30,7 @@ struct InputBar: View {
                 .buttonStyle(.glassProminent)
                 .buttonBorderShape(.circle)
                 .disabled(isEmpty)
-                .accessibilityLabel("发送")
+                .accessibilityLabel(tr("发送", "Send"))
             }
         }
         .padding(.horizontal, 12)

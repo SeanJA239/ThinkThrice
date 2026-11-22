@@ -100,7 +100,7 @@ private struct Countdown: View {
         if !context.isReady, let readyAt = context.state.readyAt {
             Text(timerInterval: Date.now...readyAt, countsDown: true)
         } else {
-            Text("好了").foregroundStyle(ice)
+            Text(context.attributes.english ? "Ready" : "好了").foregroundStyle(ice)
         }
     }
 }
@@ -111,7 +111,11 @@ private extension ActivityViewContext<HeldActivityAttributes> {
         return isStale || readyAt <= .now
     }
 
-    var title: String { "给\(attributes.peerName)的 \(state.heldCount) 条消息" }
+    var title: String { attributes.english ? "\(state.heldCount) message\(state.heldCount == 1 ? "" : "s") to \(attributes.peerName)" : "给\(attributes.peerName)的 \(state.heldCount) 条消息" }
 
-    var subtitle: String { isReady ? "冷静好了，回来再看一眼" : "正在冷静，先别急着发" }
+    var subtitle: String {
+        attributes.english
+            ? (isReady ? "Cooled down. Come back for a look" : "Cooling down. No rush to send")
+            : (isReady ? "冷静好了，回来再看一眼" : "正在冷静，先别急着发")
+    }
 }

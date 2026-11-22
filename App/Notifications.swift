@@ -45,7 +45,7 @@ final class Notifications: NSObject, UNUserNotificationCenterDelegate {
         formatter.timeZone = policy.calendar.timeZone
         formatter.dateFormat = "H:mm"
         let time = formatter.string(from: record.createdAt)
-        return policy.isNight(record.createdAt) ? "昨晚 \(time) 的那条冷静好了" : "\(time) 的那条冷静好了"
+        return policy.isNight(record.createdAt) ? tr("昨晚 \(time) 的那条冷静好了", "Your message from \(time) last night has cooled down") : tr("\(time) 的那条冷静好了", "Your message from \(time) has cooled down")
     }
 
     /// Asked at launch so the first held message can already notify.

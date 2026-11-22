@@ -17,86 +17,86 @@ struct DebugClockPanel: View {
         let _ = app.clockRevision
         NavigationStack {
             Form {
-                Section("演示时钟") {
+                Section(tr("演示时钟", "Demo clock")) {
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
-                        LabeledContent("现在", value: app.now.formatted(date: .abbreviated, time: .standard))
+                        LabeledContent(tr("现在", "Now"), value: app.now.formatted(date: .abbreviated, time: .standard))
                     }
-                    LabeledContent("时段", value: app.policy.isNight(app.now) ? "夜间" : "白天")
-                    Button("跳到 01:30（深夜）") { app.jumpClock(toNextHour: 1, minute: 30) }
-                    Button("快进到 09:00（早上）") { app.jumpClock(toNextHour: 9) }
-                    Button("快进 15 分钟") { app.advanceClock(by: 15 * 60) }
-                    Button("回到真实时间", role: .destructive) { app.resetClock() }
+                    LabeledContent(tr("时段", "Period"), value: app.policy.isNight(app.now) ? tr("夜间", "Night") : tr("白天", "Day"))
+                    Button(tr("跳到 01:30（深夜）", "Jump to 01:30 (late night)")) { app.jumpClock(toNextHour: 1, minute: 30) }
+                    Button(tr("快进到 09:00（早上）", "Skip to 09:00 (morning)")) { app.jumpClock(toNextHour: 9) }
+                    Button(tr("快进 15 分钟", "Skip 15 minutes")) { app.advanceClock(by: 15 * 60) }
+                    Button(tr("回到真实时间", "Back to real time"), role: .destructive) { app.resetClock() }
                 }
 
-                Section("锁定线（冲动指数 ≥ 锁定线就冷静）") {
-                    LabeledContent("夜间 \(Int((app.policy.nightThreshold * 100).rounded()))") {
+                Section(tr("锁定线（冲动指数 ≥ 锁定线就冷静）", "Lock line (impulse score ≥ lock line cools down)")) {
+                    LabeledContent(tr("夜间 \(Int((app.policy.nightThreshold * 100).rounded()))", "Night \(Int((app.policy.nightThreshold * 100).rounded()))")) {
                         Slider(value: $app.policy.nightThreshold, in: 0...1, step: 0.05)
                     }
-                    LabeledContent("白天 \(Int((app.policy.dayThreshold * 100).rounded()))") {
+                    LabeledContent(tr("白天 \(Int((app.policy.dayThreshold * 100).rounded()))", "Day \(Int((app.policy.dayThreshold * 100).rounded()))")) {
                         Slider(value: $app.policy.dayThreshold, in: 0...1, step: 0.05)
                     }
                 }
 
                 Section {
-                    Picker("模式", selection: Binding(
+                    Picker(tr("模式", "Mode"), selection: Binding(
                         get: { app.p2pRole?.rawValue ?? "off" },
                         set: { app.p2pRole = P2PTransport.Role(rawValue: $0) }
                     )) {
-                        Text("关闭").tag("off")
-                        Text("等待连接").tag(P2PTransport.Role.host.rawValue)
-                        Text("加入").tag(P2PTransport.Role.join.rawValue)
+                        Text(tr("关闭", "Off")).tag("off")
+                        Text(tr("等待连接", "Host")).tag(P2PTransport.Role.host.rawValue)
+                        Text(tr("加入", "Join")).tag(P2PTransport.Role.join.rawValue)
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Text("双机直连")
+                    Text(tr("双机直连", "Two phones"))
                 } footer: {
-                    Text("两台手机都打开 App，一台选「等待连接」，另一台选「加入」，然后都进入列表里的「附近的 TA」。连不上就选「关闭」，回到预设对话演示。")
+                    Text(tr("两台手机都打开 App，一台选「等待连接」，另一台选「加入」，然后都进入列表里的「附近的 TA」。连不上就选「关闭」，回到预设对话演示。", "Open the app on both phones, choose \"Host\" on one and \"Join\" on the other, then open \"Someone nearby\" in the list. If they won't connect, choose \"Off\" and demo with the scripted chats."))
                 }
 
                 Section {
-                    Button("清空所有对话", role: .destructive) { confirmReset = true }
-                        .confirmationDialog("清空所有对话？", isPresented: $confirmReset, titleVisibility: .visible) {
-                            Button("清空并重新开始", role: .destructive) {
+                    Button(tr("清空所有对话", "Clear all chats"), role: .destructive) { confirmReset = true }
+                        .confirmationDialog(tr("清空所有对话？", "Clear all chats?"), isPresented: $confirmReset, titleVisibility: .visible) {
+                            Button(tr("清空并重新开始", "Clear and start over"), role: .destructive) {
                                 app.resetAll()
                                 dismiss()
                             }
                         } message: {
-                            Text("删除所有消息和冷静状态，演示时钟和阈值也恢复默认。")
+                            Text(tr("删除所有消息和冷静状态，演示时钟和阈值也恢复默认。", "Deletes every message and cooldown, and resets the demo clock and lock lines."))
                         }
                 } header: {
-                    Text("彩排")
+                    Text(tr("彩排", "Rehearsal"))
                 }
 
                 Section {
-                    LabeledContent("模型", value: app.judge.modelName)
-                    LabeledContent("中文 BERT 资源", value: app.embeddingStatus)
-                    Picker("发给", selection: $probeRecipient) {
-                        Text("前任").tag(Recipient.ex)
-                        Text("老板").tag(Recipient.boss)
-                        Text("其他").tag(Recipient.other)
+                    LabeledContent(tr("模型", "Model"), value: app.judge.modelName)
+                    LabeledContent("中文 BERT 资源", value: app.embeddingState.label)
+                    Picker(tr("发给", "To"), selection: $probeRecipient) {
+                        Text(tr("前任", "Ex")).tag(Recipient.ex)
+                        Text(tr("老板", "Boss")).tag(Recipient.boss)
+                        Text(tr("其他", "Other")).tag(Recipient.other)
                     }
                     .pickerStyle(.segmented)
-                    TextField("输入一句话试试", text: $probe, axis: .vertical)
+                    TextField(tr("输入一句话试试", "Type a sentence to test"), text: $probe, axis: .vertical)
                     if !probe.isEmpty {
                         let night = app.policy.isNight(app.now)
                         let verdict = app.judge.judge(probe, to: probeRecipient, lateNight: night)
-                        LabeledContent("模型概率", value: app.judge.modelProbability(probe).formatted(.number.precision(.fractionLength(2))))
-                        LabeledContent("冲动指数", value: "\(Int(verdict.score.rounded()))")
-                        LabeledContent("现在会", value: app.policy.shouldSettle(score: verdict.impulse, at: app.now) ? "冷静" : "直接送达")
-                        LabeledContent("原因", value: verdict.reason.rawValue)
-                        LabeledContent("命中规则", value: verdict.matched.isEmpty ? "无" : verdict.matched.joined(separator: "、"))
+                        LabeledContent(tr("模型概率", "Model probability"), value: app.judge.modelProbability(probe).formatted(.number.precision(.fractionLength(2))))
+                        LabeledContent(tr("冲动指数", "Impulse score"), value: "\(Int(verdict.score.rounded()))")
+                        LabeledContent(tr("现在会", "Right now it would"), value: app.policy.shouldSettle(score: verdict.impulse, at: app.now) ? tr("冷静", "Cool down") : tr("直接送达", "Deliver"))
+                        LabeledContent(tr("原因", "Reason"), value: verdict.reason.rawValue)
+                        LabeledContent(tr("命中规则", "Matched words"), value: verdict.matched.isEmpty ? tr("无", "None") : verdict.matched.joined(separator: "、"))
                     }
                 } header: {
-                    Text("打分器")
+                    Text(tr("打分器", "Scorer"))
                 } footer: {
-                    Text("按当前演示时钟判断是否深夜。规则在 CalmCore/Sources/CalmCore/ThinkThriceRules.swift。")
+                    Text(tr("按当前演示时钟判断是否深夜。规则在 CalmCore/Sources/CalmCore/ThinkThriceRules.swift。", "Late night follows the demo clock. Rules are in CalmCore/Sources/CalmCore/ThinkThriceRules.swift."))
                 }
             }
-            .navigationTitle("演示面板")
+            .navigationTitle(tr("演示面板", "Demo panel"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") { dismiss() }
+                    Button(tr("完成", "Done")) { dismiss() }
                 }
             }
         }

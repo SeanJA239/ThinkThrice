@@ -3,6 +3,7 @@
     {
       "id": "ex",
       "name": "前任",
+      "nameEn": "Ex",
       "recipient": "ex",
       "seed": [
         "最近还好吗？",
@@ -19,6 +20,7 @@
     {
       "id": "boss",
       "name": "老板",
+      "nameEn": "Boss",
       "recipient": "boss",
       "seed": [
         "方案明早九点前发我",
@@ -34,6 +36,7 @@
     {
       "id": "teammate",
       "name": "组员",
+      "nameEn": "Teammate",
       "recipient": "other",
       "seed": [
         "PPT 后半部分我实在做不完了",

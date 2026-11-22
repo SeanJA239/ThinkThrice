@@ -45,7 +45,7 @@ struct ChatScreen: View {
                     // Hidden entry to the demo panel: press and hold the header.
                     .onLongPressGesture(minimumDuration: 0.8) { showDebugPanel = true }
                     .accessibilityAddTraits(.isButton)
-                    .accessibilityHint("轻点查看联系人详情")
+                    .accessibilityHint(tr("轻点查看联系人详情", "Tap for contact details"))
             }
             // The header draws its own glass capsule.
             .sharedBackgroundVisibility(.hidden)
@@ -53,14 +53,14 @@ struct ChatScreen: View {
                 coolingButton
             }
         }
-        .confirmationDialog(store.isCooling ? "提前结束冷静？" : "让这段对话冷静 15 分钟？", isPresented: $confirmCooling, titleVisibility: .visible) {
+        .confirmationDialog(store.isCooling ? tr("提前结束冷静？", "End the cooldown early?") : tr("让这段对话冷静 15 分钟？", "Cool this chat down for 15 minutes?"), isPresented: $confirmCooling, titleVisibility: .visible) {
             if store.isCooling {
-                Button("结束冷静") { store.endCooling() }
+                Button(tr("结束冷静", "End cooldown")) { store.endCooling() }
             } else {
-                Button("开始冷静") { store.startCooling() }
+                Button(tr("开始冷静", "Start cooldown")) { store.startCooling() }
             }
         } message: {
-            Text(store.isCooling ? "暂停中的回复会立刻出现。" : "15 分钟内，你发的消息会先冻住，对方的回复也先不显示；TA 会看到你「冷静中」。")
+            Text(store.isCooling ? tr("暂停中的回复会立刻出现。", "Replies held during the pause will appear right away.") : tr("15 分钟内，你发的消息会先冻住，对方的回复也先不显示；TA 会看到你「冷静中」。", "For 15 minutes, your messages freeze first and their replies stay hidden. They will see you as \"Cooling down\"."))
         }
         .overlay(alignment: .top) { contactCard }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { note in
@@ -119,8 +119,8 @@ struct ChatScreen: View {
     }
 
     private var inputPlaceholder: String {
-        guard store.isCooling, let until = store.coolUntil else { return "写点什么…" }
-        return "冷静中，消息会等到 \(until.formatted(date: .omitted, time: .shortened))"
+        guard store.isCooling, let until = store.coolUntil else { return tr("写点什么…", "Write something…") }
+        return tr("冷静中，消息会等到 \(until.formatted(date: .omitted, time: .shortened))", "Cooling down, messages wait until \(until.formatted(date: .omitted, time: .shortened))")
     }
 
     /// Top right: a snowflake that pauses the conversation for both sides, or the
@@ -138,7 +138,7 @@ struct ChatScreen: View {
             }
         }
         .tint(store.isCooling ? Theme.ice : nil)
-        .accessibilityLabel(store.isCooling ? "冷静中，轻点提前结束" : "冷静 15 分钟")
+        .accessibilityLabel(store.isCooling ? tr("冷静中，轻点提前结束", "Cooling down, tap to end early") : tr("冷静 15 分钟", "Cool down 15 min"))
     }
 
     @ViewBuilder private var banner: some View {
@@ -197,7 +197,7 @@ struct ChatHeader: View {
                 .contentTransition(.opacity)
             // While cooling, the countdown needs the room; the demo time would cut it off.
             if app.clock.isShifted, !store.isCooling {
-                Text(" · 演示时间 \(app.now.formatted(date: .omitted, time: .shortened))")
+                Text(tr(" · 演示时间 \(app.now.formatted(date: .omitted, time: .shortened))", " · Demo time \(app.now.formatted(date: .omitted, time: .shortened))"))
                     .foregroundStyle(.secondary)
             }
         }
@@ -208,13 +208,13 @@ struct ChatHeader: View {
     private var statusText: String {
         if store.isCooling, let until = store.coolUntil {
             let left = max(0, Int(until.timeIntervalSince(app.now)))
-            return String(format: "双方冷静中 · 还剩 %d:%02d", left / 60, left % 60)
+            return String(format: tr("双方冷静中 · 还剩 %d:%02d", "Both cooling · %d:%02d left"), left / 60, left % 60)
         }
-        if store.peerIsTyping { return "正在输入…" }
+        if store.peerIsTyping { return tr("正在输入…", "Typing…") }
         switch store.presence {
-        case .online: return "在线"
-        case .searching: return "正在寻找附近的手机…"
-        case .disconnected: return "连接断开，正在重连…"
+        case .online: return tr("在线", "Online")
+        case .searching: return tr("正在寻找附近的手机…", "Looking for the nearby phone…")
+        case .disconnected: return tr("连接断开，正在重连…", "Disconnected, reconnecting…")
         }
     }
 

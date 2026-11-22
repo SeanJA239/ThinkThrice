@@ -15,7 +15,7 @@ struct RitualSheet: View {
         if case .ritual(let step, let total)? = store.records[id]?.state {
             let questions = app.content.questions.ritual(total: total)
             VStack(spacing: 28) {
-                Text("第 \(step + 1) / \(total) 题")
+                Text(tr("第 \(step + 1) / \(total) 题", "Question \(step + 1) of \(total)"))
                     .font(.footnote.monospacedDigit())
                     .foregroundStyle(.secondary)
 
@@ -25,7 +25,7 @@ struct RitualSheet: View {
                     .multilineTextAlignment(.center)
                     .id(step)
                     .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)).combined(with: .opacity))
-                Text("不用回答，想一想就好")
+                Text(tr("不用回答，想一想就好", "No need to answer, just think about it"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -36,14 +36,14 @@ struct RitualSheet: View {
                     withAnimation { store.send(id, .ritualNext) }
                     if store.records[id]?.state == .delivered { store.route = nil }
                 } label: {
-                    Text(step + 1 == total ? "仍然发送" : "下一题")
+                    Text(step + 1 == total ? tr("仍然发送", "Send anyway") : tr("下一题", "Next"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
                 }
                 .buttonStyle(.glassProminent)
                 .disabled(!unlocked)
 
-                Button("算了") {
+                Button(tr("算了", "Never mind")) {
                     store.send(id, .ritualCancel)
                     store.route = nil
                 }
@@ -99,13 +99,13 @@ private struct BreathingGuide: View {
                 .scaleEffect(0.45 + 0.55 * breath)
                 .rotationEffect(.degrees(60 * breath))
                 .frame(width: 170, height: 170)
-                Text(unlocked ? "可以继续了" : (phase < 0.5 ? "吸气…" : "呼气…"))
+                Text(unlocked ? tr("可以继续了", "You can go on") : (phase < 0.5 ? tr("吸气…", "Breathe in…") : tr("呼气…", "Breathe out…")))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white.opacity(0.85))
                     .contentTransition(.opacity)
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(unlocked ? "可以继续了" : "跟着花瓣慢慢呼吸")
+        .accessibilityLabel(unlocked ? tr("可以继续了", "You can go on") : tr("跟着花瓣慢慢呼吸", "Breathe slowly with the petals"))
     }
 }

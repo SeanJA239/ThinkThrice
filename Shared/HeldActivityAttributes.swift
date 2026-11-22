@@ -13,4 +13,6 @@ nonisolated struct HeldActivityAttributes: ActivityAttributes {
 
     var conversationID: String
     var peerName: String
+    /// The app's language when the activity started; the widget has no access to the setting.
+    var english = false
 }
